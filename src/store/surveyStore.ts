@@ -2,14 +2,22 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export interface BasicInfo {
-  gender: string;
-  studentYear: string;
-  stayPeriod: string;
+  roomMove: string;
+  minPeriod: string;
   dormBuilding: string;
+  smoking: string;
+  hasFridge: string;
+  prefFridge: string;
+  hasRouter: string;
+  prefRouter: string;
 }
 
 export interface SurveyAnswers {
   [key: string]: number;
+}
+
+export interface SoftAnswers {
+  [key: string]: string;
 }
 
 export interface Weights {
@@ -34,6 +42,7 @@ interface SurveyState {
   currentStep: number;
   basicInfo: BasicInfo;
   surveyAnswers: SurveyAnswers;
+  softAnswers: SoftAnswers;
   weights: Weights;
   matchResults: MatchCandidate[];
   isComplete: boolean;
@@ -42,6 +51,7 @@ interface SurveyState {
   setCurrentStep: (step: number) => void;
   setBasicInfo: (info: Partial<BasicInfo>) => void;
   setSurveyAnswer: (questionId: string, value: number) => void;
+  setSoftAnswer: (questionId: string, value: string) => void;
   setWeight: (category: string, weight: 'low' | 'normal' | 'high') => void;
   setMatchResults: (results: MatchCandidate[]) => void;
   setComplete: (complete: boolean) => void;
@@ -52,13 +62,23 @@ const initialState = {
   currentPhase: 1,
   currentStep: 0,
   basicInfo: {
-    gender: '',
-    studentYear: '',
-    stayPeriod: '',
+    roomMove: '',
+    minPeriod: '',
     dormBuilding: '',
+    smoking: '',
+    hasFridge: '',
+    prefFridge: '',
+    hasRouter: '',
+    prefRouter: '',
   },
   surveyAnswers: {},
-  weights: {},
+  softAnswers: {},
+  weights: {
+    lifestyle: 'normal' as const,
+    space: 'normal' as const,
+    habits: 'normal' as const,
+    social: 'normal' as const,
+  },
   matchResults: [],
   isComplete: false,
 };
@@ -75,6 +95,9 @@ export const useSurveyStore = create<SurveyState>()(
       })),
       setSurveyAnswer: (questionId, value) => set((state) => ({
         surveyAnswers: { ...state.surveyAnswers, [questionId]: value }
+      })),
+      setSoftAnswer: (questionId, value) => set((state) => ({
+        softAnswers: { ...state.softAnswers, [questionId]: value }
       })),
       setWeight: (category, weight) => set((state) => ({
         weights: { ...state.weights, [category]: weight }

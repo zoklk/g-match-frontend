@@ -120,7 +120,7 @@ const Results = () => {
             <div>
               <h2 className="text-xl font-bold text-foreground">내 프로필</h2>
               <p className="text-muted-foreground text-sm">
-                {basicInfo.studentYear}학번 · {basicInfo.dormBuilding}동 희망
+                {basicInfo.dormBuilding === 'any' ? '동 상관없음' : `${basicInfo.dormBuilding}동 희망`}
               </p>
             </div>
           </div>
