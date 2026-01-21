@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ProgressSteps } from '@/components/ProgressSteps';
-import { SurveySlider } from '@/components/SurveySlider';
 import { Badge } from '@/components/ui/badge';
 import { useSurveyStore } from '@/store/surveyStore';
 import { 
@@ -22,12 +21,12 @@ const Survey = () => {
     basicInfo,
     surveyAnswers,
     softAnswers,
-    weights,
+    questionWeights,
     setCurrentPhase,
     setBasicInfo,
     setSurveyAnswer,
     setSoftAnswer,
-    setWeight,
+    setQuestionWeight,
     setComplete,
   } = useSurveyStore();
 
@@ -82,13 +81,24 @@ const Survey = () => {
     </motion.div>
   );
 
-  // Phase 2: Survey Questions (Scroll Format)
+  // Phase 2: Survey Questions (Button/Note Format)
   const questionsByCategory = useMemo(() => {
     return surveyCategories.map(category => ({
       ...category,
       questions: surveyQuestions.filter(q => q.category === category.id),
     }));
   }, []);
+
+  // Generate button labels from leftLabel and rightLabel
+  const getButtonLabels = (leftLabel: string, rightLabel: string) => {
+    return [
+      { value: 1, label: leftLabel },
+      { value: 2, label: '약간 ' + leftLabel.replace(/[^가-힣a-zA-Z]/g, '') },
+      { value: 3, label: '중간' },
+      { value: 4, label: '약간 ' + rightLabel.replace(/[^가-힣a-zA-Z]/g, '') },
+      { value: 5, label: rightLabel },
+    ];
+  };
 
   const renderPhase2 = () => (
     <motion.div
@@ -140,35 +150,61 @@ const Survey = () => {
           </div>
 
           <div className="space-y-4">
-            {category.questions.map((question, index) => (
-              <div
-                key={question.id}
-                className="bg-card rounded-md p-5 shadow-sm border border-border"
-              >
-                <div className="flex items-start gap-3 mb-4">
-                  <span className="text-sm font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded">
-                    Q{index + 1}
-                  </span>
-                  <div className="flex-1">
-                    <h4 className="font-medium text-foreground">
-                      {question.question}
-                    </h4>
-                    {question.description && (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {question.description}
-                      </p>
-                    )}
+            {category.questions.map((question, index) => {
+              const isAnswered = surveyAnswers[question.id] !== undefined;
+              const buttons = getButtonLabels(question.leftLabel, question.rightLabel);
+              
+              return (
+                <div
+                  key={question.id}
+                  className={cn(
+                    "bg-card rounded-md p-5 shadow-sm border transition-all",
+                    isAnswered ? "border-primary/30" : "border-border opacity-70"
+                  )}
+                >
+                  <div className="flex items-start gap-3 mb-4">
+                    <span className={cn(
+                      "text-sm font-medium px-2 py-0.5 rounded",
+                      isAnswered ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                    )}>
+                      Q{index + 1}
+                    </span>
+                    <div className="flex-1">
+                      <h4 className="font-medium text-foreground">
+                        {question.question}
+                      </h4>
+                      {question.description && (
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {question.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Button Options */}
+                  <div className="flex flex-wrap gap-2">
+                    {buttons.map((btn) => (
+                      <button
+                        key={btn.value}
+                        onClick={() => setSurveyAnswer(question.id, btn.value)}
+                        className={cn(
+                          "px-3 py-2 rounded-sm text-sm font-medium transition-all border-2 flex-1 min-w-[60px]",
+                          surveyAnswers[question.id] === btn.value
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-border bg-background text-foreground hover:border-primary/50"
+                        )}
+                      >
+                        {btn.value}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex justify-between text-xs text-muted-foreground mt-2 px-1">
+                    <span>{question.leftLabel}</span>
+                    <span>{question.rightLabel}</span>
                   </div>
                 </div>
-
-                <SurveySlider
-                  value={surveyAnswers[question.id] || 3}
-                  onChange={(value) => setSurveyAnswer(question.id, value)}
-                  leftLabel={question.leftLabel}
-                  rightLabel={question.rightLabel}
-                />
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       ))}
@@ -186,44 +222,54 @@ const Survey = () => {
         </div>
 
         <div className="space-y-4">
-          {softQuestions.map((question, index) => (
-            <div
-              key={question.id}
-              className="bg-card rounded-md p-5 shadow-sm border border-border"
-            >
-              <div className="flex items-start gap-3 mb-4">
-                <span className="text-sm font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded">
-                  Q{index + 1}
-                </span>
-                <h4 className="font-medium text-foreground flex-1">
-                  {question.question}
-                </h4>
-              </div>
+          {softQuestions.map((question, index) => {
+            const isAnswered = softAnswers[question.id] !== undefined;
+            
+            return (
+              <div
+                key={question.id}
+                className={cn(
+                  "bg-card rounded-md p-5 shadow-sm border transition-all",
+                  isAnswered ? "border-primary/30" : "border-border opacity-70"
+                )}
+              >
+                <div className="flex items-start gap-3 mb-4">
+                  <span className={cn(
+                    "text-sm font-medium px-2 py-0.5 rounded",
+                    isAnswered ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                  )}>
+                    Q{index + 1}
+                  </span>
+                  <h4 className="font-medium text-foreground flex-1">
+                    {question.question}
+                  </h4>
+                </div>
 
-              <div className="flex flex-wrap gap-2">
-                {question.options.map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => setSoftAnswer(question.id, option.value)}
-                    className={cn(
-                      "px-4 py-2 rounded-sm text-sm font-medium transition-colors border-2",
-                      softAnswers[question.id] === option.value
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border bg-background text-foreground hover:border-primary/50"
-                    )}
-                  >
-                    {option.label}
-                  </button>
-                ))}
+                <div className="flex flex-wrap gap-2">
+                  {question.options.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => setSoftAnswer(question.id, option.value)}
+                      className={cn(
+                        "px-4 py-2 rounded-sm text-sm font-medium transition-colors border-2",
+                        softAnswers[question.id] === option.value
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-background text-foreground hover:border-primary/50"
+                      )}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </motion.div>
   );
 
-  // Phase 3: Weight Settings (Scroll Format)
+  // Phase 3: Per-Question Weight Settings
   const renderPhase3 = () => (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -238,46 +284,126 @@ const Survey = () => {
         </p>
       </div>
 
-      <div className="space-y-4">
-        {surveyCategories.map((category) => (
-          <div
-            key={category.id}
-            className="bg-card rounded-md p-5 shadow-sm border border-border"
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-2xl">{category.icon}</span>
-              <div>
-                <span className="font-semibold text-foreground">{category.name}</span>
-                <p className="text-sm text-muted-foreground">
-                  {category.leftAxis} ↔ {category.rightAxis}
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex gap-2">
-              {(['low', 'normal', 'high'] as const).map((weight) => (
-                <button
-                  key={weight}
-                  onClick={() => setWeight(category.id, weight)}
-                  className={cn(
-                    "flex-1 py-2.5 px-3 rounded-sm text-sm font-medium transition-colors border-2",
-                    weights[category.id] === weight
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border bg-background text-foreground hover:border-primary/50"
-                  )}
-                >
-                  {weight === 'low' && '낮음 (0.5x)'}
-                  {weight === 'normal' && '보통 (1.0x)'}
-                  {weight === 'high' && '높음 (2.0x)'}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
+      <div className="bg-muted/50 rounded-md p-4 text-sm text-muted-foreground mb-6">
+        <p>💡 기본값은 x1.0입니다. 중요한 항목은 x2.0으로, 덜 중요한 항목은 x0.5로 조정하세요.</p>
       </div>
 
-      <div className="bg-muted/50 rounded-md p-4 text-sm text-muted-foreground">
-        <p>💡 가중치가 높을수록 해당 카테고리의 유사도가 매칭 점수에 더 큰 영향을 미칩니다.</p>
+      {questionsByCategory.map((category) => (
+        <div key={category.id} className="space-y-3">
+          <div className="flex items-center gap-3 pb-2 border-b border-border">
+            <span className="text-2xl">{category.icon}</span>
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">{category.name}</h3>
+              <p className="text-sm text-muted-foreground">
+                {category.leftAxis} ↔ {category.rightAxis}
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            {category.questions.map((question, index) => {
+              const currentWeight = questionWeights[question.id] ?? 1.0;
+              
+              return (
+                <div
+                  key={question.id}
+                  className="bg-card rounded-md p-4 shadow-sm border border-border"
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                          Q{index + 1}
+                        </span>
+                        <span className="text-sm font-medium text-foreground truncate">
+                          {question.question}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-1 shrink-0">
+                      {[
+                        { value: 0.5, label: '0.5x' },
+                        { value: 1.0, label: '1.0x' },
+                        { value: 2.0, label: '2.0x' },
+                      ].map((weight) => (
+                        <button
+                          key={weight.value}
+                          onClick={() => setQuestionWeight(question.id, weight.value)}
+                          className={cn(
+                            "py-1.5 px-2 rounded-sm text-xs font-medium transition-colors border",
+                            currentWeight === weight.value
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-border bg-background text-muted-foreground hover:border-primary/50"
+                          )}
+                        >
+                          {weight.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+
+      {/* Soft Questions Weight */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-3 pb-2 border-b border-border">
+          <span className="text-2xl">📋</span>
+          <div>
+            <h3 className="text-lg font-semibold text-foreground">생활 기타</h3>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          {softQuestions.map((question, index) => {
+            const currentWeight = questionWeights[question.id] ?? 1.0;
+            
+            return (
+              <div
+                key={question.id}
+                className="bg-card rounded-md p-4 shadow-sm border border-border"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                        Q{index + 1}
+                      </span>
+                      <span className="text-sm font-medium text-foreground truncate">
+                        {question.question}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-1 shrink-0">
+                    {[
+                      { value: 0.5, label: '0.5x' },
+                      { value: 1.0, label: '1.0x' },
+                      { value: 2.0, label: '2.0x' },
+                    ].map((weight) => (
+                      <button
+                        key={weight.value}
+                        onClick={() => setQuestionWeight(question.id, weight.value)}
+                        className={cn(
+                          "py-1.5 px-2 rounded-sm text-xs font-medium transition-colors border",
+                          currentWeight === weight.value
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-border bg-background text-muted-foreground hover:border-primary/50"
+                        )}
+                      >
+                        {weight.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </motion.div>
   );
@@ -288,7 +414,6 @@ const Survey = () => {
       return Object.values(basicInfo).every(v => v !== '');
     }
     if (currentPhase === 2) {
-      // All survey questions must be answered
       const allQuestionsAnswered = surveyQuestions.every(q => surveyAnswers[q.id] !== undefined);
       const allSoftAnswered = softQuestions.every(q => softAnswers[q.id] !== undefined);
       return allQuestionsAnswered && allSoftAnswered;
@@ -305,7 +430,7 @@ const Survey = () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (currentPhase === 3) {
       setComplete(true);
-      navigate('/results');
+      navigate('/matching');
     }
   };
 
