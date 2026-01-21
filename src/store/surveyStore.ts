@@ -20,14 +20,16 @@ export interface SoftAnswers {
   [key: string]: string;
 }
 
-export interface Weights {
-  [category: string]: 'low' | 'normal' | 'high';
+// Per-question weights: 0.5, 1.0, or 2.0
+export interface QuestionWeights {
+  [questionId: string]: number;
 }
 
 export interface MatchCandidate {
   id: string;
-  name: string;
-  studentYear: string;
+  nickname: string;
+  name?: string;
+  contact?: string;
   overallScore: number;
   categoryScores: {
     lifestyle: number;
@@ -35,7 +37,10 @@ export interface MatchCandidate {
     habits: number;
     social: number;
   };
+  badges: string[];
 }
+
+export type MatchingStage = 'before' | 'matching' | 'result' | 'confirmed';
 
 interface SurveyState {
   currentPhase: number;
@@ -43,8 +48,11 @@ interface SurveyState {
   basicInfo: BasicInfo;
   surveyAnswers: SurveyAnswers;
   softAnswers: SoftAnswers;
-  weights: Weights;
+  questionWeights: QuestionWeights;
   matchResults: MatchCandidate[];
+  currentMatch: MatchCandidate | null;
+  matchingStage: MatchingStage;
+  excludedIds: string[];
   isComplete: boolean;
   
   setCurrentPhase: (phase: number) => void;
@@ -52,10 +60,14 @@ interface SurveyState {
   setBasicInfo: (info: Partial<BasicInfo>) => void;
   setSurveyAnswer: (questionId: string, value: number) => void;
   setSoftAnswer: (questionId: string, value: string) => void;
-  setWeight: (category: string, weight: 'low' | 'normal' | 'high') => void;
+  setQuestionWeight: (questionId: string, weight: number) => void;
   setMatchResults: (results: MatchCandidate[]) => void;
+  setCurrentMatch: (match: MatchCandidate | null) => void;
+  setMatchingStage: (stage: MatchingStage) => void;
+  addExcludedId: (id: string) => void;
   setComplete: (complete: boolean) => void;
   reset: () => void;
+  resetMatching: () => void;
 }
 
 const initialState = {
@@ -73,13 +85,11 @@ const initialState = {
   },
   surveyAnswers: {},
   softAnswers: {},
-  weights: {
-    lifestyle: 'normal' as const,
-    space: 'normal' as const,
-    habits: 'normal' as const,
-    social: 'normal' as const,
-  },
+  questionWeights: {},
   matchResults: [],
+  currentMatch: null,
+  matchingStage: 'before' as MatchingStage,
+  excludedIds: [],
   isComplete: false,
 };
 
@@ -99,12 +109,21 @@ export const useSurveyStore = create<SurveyState>()(
       setSoftAnswer: (questionId, value) => set((state) => ({
         softAnswers: { ...state.softAnswers, [questionId]: value }
       })),
-      setWeight: (category, weight) => set((state) => ({
-        weights: { ...state.weights, [category]: weight }
+      setQuestionWeight: (questionId, weight) => set((state) => ({
+        questionWeights: { ...state.questionWeights, [questionId]: weight }
       })),
       setMatchResults: (results) => set({ matchResults: results }),
+      setCurrentMatch: (match) => set({ currentMatch: match }),
+      setMatchingStage: (stage) => set({ matchingStage: stage }),
+      addExcludedId: (id) => set((state) => ({ 
+        excludedIds: [...state.excludedIds, id] 
+      })),
       setComplete: (complete) => set({ isComplete: complete }),
       reset: () => set(initialState),
+      resetMatching: () => set({ 
+        matchingStage: 'before', 
+        currentMatch: null 
+      }),
     }),
     {
       name: 'gmatch-survey',

@@ -6,7 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import Survey from "./pages/Survey";
-import Results from "./pages/Results";
+import Profile from "./pages/Profile";
+import Matching from "./pages/Matching";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,7 +22,8 @@ const App = () => (
           <Route path="/" element={<Landing />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/survey" element={<Survey />} />
-          <Route path="/results" element={<Results />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/matching" element={<Matching />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
