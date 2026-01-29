@@ -42,10 +42,3 @@ jobs:
             --delete \
             --acl public-read
 
-      - name: Invalidate CloudFront cache (optional)
-        if: ${{ CLOUDFRONT_DISTRIBUTION_ID != '' }}
-        run: |
-          aws cloudfront create-invalidation \
-            --distribution-id ${{ CLOUDFRONT_DISTRIBUTION_ID }} \
-            --paths "/*"
-        continue-on-error: true
