@@ -5,10 +5,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
+import AuthCallback from "./pages/AuthCallback";
+import RegisterAgree from "./pages/RegisterAgree";
 import Survey from "./pages/Survey";
 import Profile from "./pages/Profile";
 import Matching from "./pages/Matching";
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -19,12 +22,39 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Landing />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/survey" element={<Survey />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/matching" element={<Matching />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/register/agree" element={<RegisterAgree />} />
+
+          {/* Protected Routes */}
+          <Route
+            path="/survey"
+            element={
+              <ProtectedRoute>
+                <Survey />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/matching"
+            element={
+              <ProtectedRoute>
+                <Matching />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Catch-all route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

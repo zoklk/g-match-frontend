@@ -1,32 +1,40 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { ArrowLeft, Mail, Lock, User } from 'lucide-react';
+import { ArrowLeft, LogIn } from 'lucide-react';
+import { loginWithGIST } from '@/api/auth';
+import { useAuthStore } from '@/store/authStore';
 
 const Auth = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const [isLogin, setIsLogin] = useState(searchParams.get('mode') === 'login');
-  const [isLoading, setIsLoading] = useState(false);
-  
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    name: '',
-  });
+  const location = useLocation();
+  const { isLoggedIn, checkAuth } = useAuthStore();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    setIsLoading(false);
-    navigate('/survey');
+  // 이미 로그인된 경우 리다이렉트
+  useEffect(() => {
+    const check = async () => {
+      if (isLoggedIn) {
+        const from = location.state?.from?.pathname || '/';
+        navigate(from, { replace: true });
+        return;
+      }
+
+      // 서버에서 세션 확인
+      const isAuthenticated = await checkAuth();
+      if (isAuthenticated) {
+        const from = location.state?.from?.pathname || '/';
+        navigate(from, { replace: true });
+      }
+    };
+
+    check();
+  }, [isLoggedIn, navigate, location.state, checkAuth]);
+
+  const handleLogin = () => {
+    // Callback URL 설정
+    const callbackUrl = `${window.location.origin}/auth/callback`;
+    loginWithGIST(callbackUrl);
   };
 
   return (
@@ -36,18 +44,20 @@ const Auth = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-primary-dark via-primary to-primary-dark" />
         <div className="absolute top-1/4 right-0 w-64 h-64 bg-primary-foreground/10 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 left-0 w-96 h-96 bg-primary-foreground/5 rounded-full blur-3xl" />
-        
+
         <div className="relative z-10 flex flex-col justify-center px-12 text-primary-foreground">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <h1 className="text-4xl font-bold mb-4">G-Match</h1>
+            <div className="mb-6">
+              <img src="/logo.png" alt="G-Match" className="h-16 w-auto brightness-0 invert" />
+            </div>
             <p className="text-xl text-primary-foreground/80 mb-8">
               완벽한 룸메이트를 찾는<br />가장 스마트한 방법
             </p>
-            
+
             <div className="space-y-4">
               {[
                 '24개 문항 기반 정밀 분석',
@@ -70,7 +80,7 @@ const Auth = () => {
         </div>
       </div>
 
-      {/* Right Panel - Form */}
+      {/* Right Panel - Login */}
       <div className="flex-1 flex flex-col justify-center px-6 py-12 lg:px-16">
         <div className="max-w-md w-full mx-auto">
           <button
@@ -84,90 +94,60 @@ const Auth = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
+            className="space-y-8"
           >
-            <div>
+            {/* Logo for mobile */}
+            <div className="lg:hidden flex justify-center mb-4">
+              <img src="/logo.png" alt="G-Match" className="h-12 w-auto" />
+            </div>
+
+            <div className="text-center lg:text-left">
               <h2 className="text-2xl font-bold text-foreground">
-                {isLogin ? '로그인' : '회원가입'}
+                G-Match 시작하기
               </h2>
               <p className="text-muted-foreground mt-2">
-                {isLogin 
-                  ? '계정에 로그인하여 매칭 결과를 확인하세요' 
-                  : 'G-Match와 함께 완벽한 룸메이트를 찾아보세요'}
+                GIST 계정으로 로그인하여 완벽한 룸메이트를 찾아보세요
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {!isLogin && (
-                <div className="space-y-2">
-                  <Label htmlFor="name">이름</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                    <Input
-                      id="name"
-                      type="text"
-                      placeholder="이름을 입력하세요"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="pl-10 h-12"
-                      required={!isLogin}
-                    />
-                  </div>
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <Label htmlFor="email">이메일</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="GIST 이메일을 입력하세요"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="pl-10 h-12"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password">비밀번호</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="비밀번호를 입력하세요"
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="pl-10 h-12"
-                    required
-                  />
-                </div>
-              </div>
-
+            {/* GIST IdP Login Button */}
+            <div className="space-y-4">
               <Button
-                type="submit"
+                onClick={handleLogin}
                 size="lg"
-                className="w-full"
-                loading={isLoading}
+                className="w-full h-14 text-base"
               >
-                {isLogin ? '로그인' : '회원가입'}
+                <LogIn className="w-5 h-5 mr-2" />
+                GIST 계정으로 로그인
               </Button>
-            </form>
 
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={() => setIsLogin(!isLogin)}
-                className="text-sm text-muted-foreground hover:text-primary transition-colors"
-              >
-                {isLogin 
-                  ? '계정이 없으신가요? 회원가입' 
-                  : '이미 계정이 있으신가요? 로그인'}
-              </button>
+              <p className="text-xs text-center text-muted-foreground">
+                GIST IdP를 통해 안전하게 로그인합니다.<br />
+                처음 로그인하시는 경우 자동으로 회원가입됩니다.
+              </p>
+            </div>
+
+            {/* Features */}
+            <div className="pt-8 border-t border-border">
+              <h3 className="text-sm font-medium text-muted-foreground mb-4">
+                G-Match 특징
+              </h3>
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { icon: '🎯', text: '정밀 매칭' },
+                  { icon: '🔒', text: '안전한 인증' },
+                  { icon: '⚡', text: '빠른 설문' },
+                  { icon: '🤝', text: '상호 동의' },
+                ].map((feature, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-2 text-sm text-muted-foreground"
+                  >
+                    <span>{feature.icon}</span>
+                    <span>{feature.text}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </motion.div>
         </div>

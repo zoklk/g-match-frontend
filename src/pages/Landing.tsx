@@ -49,6 +49,11 @@ const Landing = () => {
               GIST 학생을 위한 룸메이트 매칭
             </div>
             
+            {/* Logo */}
+            <div className="flex justify-center mb-6">
+              <img src="/logo.png" alt="G-Match" className="h-16 md:h-20 w-auto" />
+            </div>
+
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
               완벽한 룸메이트,
               <br />
@@ -74,7 +79,7 @@ const Landing = () => {
               <Button
                 variant="outline"
                 size="xl"
-                onClick={() => navigate('/auth?mode=login')}
+                onClick={() => navigate('/auth')}
               >
                 로그인
               </Button>
@@ -221,7 +226,7 @@ const Landing = () => {
       {/* Footer */}
       <footer className="py-8 border-t border-border">
         <div className="container mx-auto px-4 text-center text-muted-foreground text-sm">
-          <p>© 2024 G-Match. GIST 학생을 위한 룸메이트 매칭 서비스</p>
+          <p>© 2026 G-Match. GIST 학생을 위한 룸메이트 매칭 서비스</p>
         </div>
       </footer>
     </div>
