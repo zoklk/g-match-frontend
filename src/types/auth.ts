@@ -8,11 +8,9 @@ export interface User {
   name: string;
   studentId?: string;
   phoneNumber?: string;
-  birthYear?: number;
   gender?: 'M' | 'F';
   house?: string;
-  isAgePublic?: boolean;
-  isHousePublic?: boolean;
+  nickname?: string;
   isOidcUser?: boolean;
   dateJoined?: string;
 }
@@ -24,11 +22,9 @@ export interface UserResponse {
   name: string;
   student_id?: string;
   phone_number?: string;
-  birth_year?: number;
   gender?: 'M' | 'F';
   house?: string;
-  is_age_public?: boolean;
-  is_house_public?: boolean;
+  nickname?: string;
   is_oidc_user?: boolean;
   date_joined?: string;
 }
@@ -70,7 +66,24 @@ export interface AgreeTermsRequest {
   privacy_policy: boolean;
 }
 
+// 약관 동의 응답 (Step 1 완료 → Step 2로 이동)
 export interface AgreeTermsResponse {
+  success: true;
+  message: string;
+  registration_token: string;  // 새 토큰
+  next_step: string;           // 다음 단계 URL
+}
+
+// ============================================
+// 기본정보 등록 관련 타입 (Step 2)
+// ============================================
+
+export interface BasicInfoRequest {
+  gender: 'M' | 'F';  // 필수
+  house?: string;      // 선택
+}
+
+export interface BasicInfoResponse {
   success: true;
   message: string;
   user: {
@@ -92,11 +105,9 @@ export interface GetUserInfoResponse {
 
 // 수정 가능한 필드만 (IdP 관리 필드 제외)
 export interface UpdateUserInfoRequest {
-  birth_year?: number;
   gender?: 'M' | 'F';
   house?: string;
-  is_age_public?: boolean;
-  is_house_public?: boolean;
+  nickname?: string;
 }
 
 export interface UpdateUserInfoResponse {
@@ -137,11 +148,9 @@ export function transformUserResponse(response: UserResponse): User {
     name: response.name,
     studentId: response.student_id,
     phoneNumber: response.phone_number,
-    birthYear: response.birth_year,
     gender: response.gender,
     house: response.house,
-    isAgePublic: response.is_age_public,
-    isHousePublic: response.is_house_public,
+    nickname: response.nickname,
     isOidcUser: response.is_oidc_user,
     dateJoined: response.date_joined,
   };

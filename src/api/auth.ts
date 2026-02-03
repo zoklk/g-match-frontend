@@ -3,6 +3,8 @@ import {
   GetTermsResponse,
   AgreeTermsRequest,
   AgreeTermsResponse,
+  BasicInfoRequest,
+  BasicInfoResponse,
   LogoutResponse,
   GetUserInfoResponse,
   UpdateUserInfoRequest,
@@ -58,7 +60,8 @@ export const getTerms = async (): Promise<GetTermsResponse> => {
 };
 
 /**
- * 약관 동의 및 회원가입 완료
+ * 약관 동의 (Step 1)
+ * 완료 후 새 토큰과 다음 단계 URL 반환
  */
 export const agreeTerms = async (
   termsOfService: boolean,
@@ -74,6 +77,30 @@ export const agreeTerms = async (
       terms_of_service: termsOfService,
       privacy_policy: privacyPolicy,
     } as AgreeTermsRequest
+  );
+
+  return response.data;
+};
+
+// ============================================
+// 기본정보 등록 (Step 2)
+// ============================================
+
+/**
+ * 기본정보 입력 및 회원가입 완료 (Step 2)
+ * - gender: 필수 (M 또는 F)
+ * - house: 선택
+ */
+export const submitBasicInfo = async (
+  data: BasicInfoRequest,
+  registrationToken: string
+): Promise<BasicInfoResponse> => {
+  // 토큰 설정
+  setRegistrationToken(registrationToken);
+
+  const response = await registrationApi.post<BasicInfoResponse>(
+    '/account/auth/registration/basic-info',
+    data
   );
 
   return response.data;

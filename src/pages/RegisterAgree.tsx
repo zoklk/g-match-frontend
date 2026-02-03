@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { getTerms, agreeTerms } from '@/api/auth';
 import { useAuthStore } from '@/store/authStore';
-import { transformUserResponse } from '@/types/auth';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -25,7 +24,7 @@ const RegisterAgree = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const { setUser, registrationToken, clearRegistrationToken } = useAuthStore();
+  const { registrationToken, setRegistrationToken, clearRegistrationToken } = useAuthStore();
 
   const [terms, setTerms] = useState<TermsData | null>(null);
   const [agreed, setAgreed] = useState({
@@ -86,26 +85,19 @@ const RegisterAgree = () => {
         token
       );
 
-      if (response.success && response.user) {
-        // 사용자 정보 변환 및 저장
-        const user = transformUserResponse({
-          uid: response.user.uid,
-          email: response.user.email,
-          name: response.user.name,
-          student_id: response.user.student_id,
-        });
-        setUser(user);
-        clearRegistrationToken();
+      if (response.success && response.registration_token) {
+        // 새 토큰 저장 후 다음 단계로 이동
+        setRegistrationToken(response.registration_token);
 
         toast({
-          title: '회원가입 완료',
-          description: 'G-Match에 오신 것을 환영합니다!',
+          title: '약관 동의 완료',
+          description: '기본정보를 입력해주세요.',
         });
 
-        navigate('/', { replace: true });
+        navigate('/register/basic-info', { replace: true });
       }
     } catch (err: any) {
-      console.error('Registration failed:', err);
+      console.error('Agreement failed:', err);
 
       if (err.response?.data?.login_url) {
         // 세션 만료 → 다시 로그인
@@ -119,7 +111,7 @@ const RegisterAgree = () => {
       } else {
         toast({
           title: '오류',
-          description: err.response?.data?.message || '회원가입 처리 중 오류가 발생했습니다.',
+          description: err.response?.data?.message || '약관 동의 처리 중 오류가 발생했습니다.',
           variant: 'destructive',
         });
       }
@@ -281,7 +273,7 @@ const RegisterAgree = () => {
                 처리 중...
               </>
             ) : (
-              '동의하고 가입하기'
+              '동의하고 계속하기'
             )}
           </Button>
         </motion.div>

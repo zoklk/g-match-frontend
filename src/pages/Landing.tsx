@@ -2,9 +2,22 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Users, Target, Heart, Shield } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
+import { toast } from 'sonner';
 
 const Landing = () => {
   const navigate = useNavigate();
+  const { isLoggedIn } = useAuthStore();
+
+  const handleAuthClick = () => {
+    if (isLoggedIn) {
+      toast.info('이미 로그인 된 상태입니다', {
+        duration: 5000,
+      });
+    } else {
+      navigate('/auth');
+    }
+  };
 
   const features = [
     {
@@ -70,7 +83,7 @@ const Landing = () => {
               <Button
                 variant="hero"
                 size="xl"
-                onClick={() => navigate('/auth')}
+                onClick={handleAuthClick}
                 className="group"
               >
                 시작하기
@@ -79,7 +92,7 @@ const Landing = () => {
               <Button
                 variant="outline"
                 size="xl"
-                onClick={() => navigate('/auth')}
+                onClick={handleAuthClick}
               >
                 로그인
               </Button>
@@ -213,7 +226,7 @@ const Landing = () => {
             <Button
               variant="heroOutline"
               size="xl"
-              onClick={() => navigate('/auth')}
+              onClick={handleAuthClick}
               className="group"
             >
               무료로 시작하기

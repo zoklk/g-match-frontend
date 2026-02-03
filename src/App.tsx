@@ -7,6 +7,7 @@ import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import AuthCallback from "./pages/AuthCallback";
 import RegisterAgree from "./pages/RegisterAgree";
+import RegisterBasicInfo from "./pages/RegisterBasicInfo";
 import Survey from "./pages/Survey";
 import Profile from "./pages/Profile";
 import Matching from "./pages/Matching";
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/register/agree" element={<RegisterAgree />} />
+          <Route path="/register/basic-info" element={<RegisterBasicInfo />} />
 
           {/* Protected Routes */}
           <Route
@@ -46,7 +48,7 @@ const App = () => (
             }
           />
           <Route
-            path="/matching"
+            path="/match"
             element={
               <ProtectedRoute>
                 <Matching />
