@@ -80,22 +80,36 @@ const Landing = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                variant="hero"
-                size="xl"
-                onClick={handleAuthClick}
-                className="group"
-              >
-                시작하기
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Button>
-              <Button
-                variant="outline"
-                size="xl"
-                onClick={handleAuthClick}
-              >
-                로그인
-              </Button>
+              {isLoggedIn ? (
+                <Button
+                  variant="hero"
+                  size="xl"
+                  onClick={() => navigate('/match')}
+                  className="group"
+                >
+                  매칭하기
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    variant="hero"
+                    size="xl"
+                    onClick={handleAuthClick}
+                    className="group"
+                  >
+                    시작하기
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="xl"
+                    onClick={handleAuthClick}
+                  >
+                    로그인
+                  </Button>
+                </>
+              )}
             </div>
           </motion.div>
 
@@ -226,10 +240,10 @@ const Landing = () => {
             <Button
               variant="heroOutline"
               size="xl"
-              onClick={handleAuthClick}
+              onClick={isLoggedIn ? () => navigate('/match') : handleAuthClick}
               className="group"
             >
-              무료로 시작하기
+              {isLoggedIn ? '매칭하기' : '무료로 시작하기'}
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
           </motion.div>
