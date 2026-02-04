@@ -8,11 +8,18 @@ import Auth from "./pages/Auth";
 import AuthCallback from "./pages/AuthCallback";
 import RegisterAgree from "./pages/RegisterAgree";
 import RegisterBasicInfo from "./pages/RegisterBasicInfo";
-import Survey from "./pages/Survey";
-import Profile from "./pages/Profile";
-import Matching from "./pages/Matching";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
+import MatchLayout from "./components/MatchLayout";
+
+// Match - Profile flow
+import Property from "./pages/match/Property";
+import Survey from "./pages/match/Survey";
+import Weight from "./pages/match/Weight";
+import Profile from "./pages/match/Profile";
+
+// Match - Matching flow
+import MatchRouter from "./pages/match/MatchRouter";
 
 const queryClient = new QueryClient();
 
@@ -30,31 +37,23 @@ const App = () => (
           <Route path="/register/agree" element={<RegisterAgree />} />
           <Route path="/register/basic-info" element={<RegisterBasicInfo />} />
 
-          {/* Protected Routes */}
+          {/* Protected Routes with Sidebar Layout */}
           <Route
-            path="/survey"
             element={
               <ProtectedRoute>
-                <Survey />
+                <MatchLayout />
               </ProtectedRoute>
             }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/match"
-            element={
-              <ProtectedRoute>
-                <Matching />
-              </ProtectedRoute>
-            }
-          />
+          >
+            {/* Profile flow */}
+            <Route path="/match/profile" element={<Profile />} />
+            <Route path="/match/profile/property" element={<Property />} />
+            <Route path="/match/profile/survey" element={<Survey />} />
+            <Route path="/match/profile/weight" element={<Weight />} />
+
+            {/* Matching flow */}
+            <Route path="/match" element={<MatchRouter />} />
+          </Route>
 
           {/* Catch-all route */}
           <Route path="*" element={<NotFound />} />

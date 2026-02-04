@@ -47,7 +47,7 @@ const AuthCallback = () => {
       if (response.data.success && response.data.user) {
         const user = transformUserResponse(response.data.user);
         setUser(user);
-        navigate('/', { replace: true });
+        navigate('/match/profile', { replace: true });
       } else {
         setError('로그인 처리 중 오류가 발생했습니다.');
       }
