@@ -2,13 +2,11 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, User, Loader2, RotateCcw, Copy } from 'lucide-react';
+import { Check, User, Loader2, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { getMatchResult, getContact, rematch as rematchApi } from '@/api/match';
+import { getContact, rematch as rematchApi } from '@/api/match';
 import { useMatchStore } from '@/store/matchStore';
 import { useToast } from '@/hooks/use-toast';
-import { ProfileProperty, ProfileSurvey } from '@/types/match';
-import { surveyCategories } from '@/data/surveyQuestions';
 import {
   Radar,
   RadarChart,
@@ -32,38 +30,18 @@ interface MatchContactProps {
   onRefresh: () => Promise<void>;
 }
 
-const categoryNameMap: Record<string, string> = {
-  time: '생활 리듬',
-  clean: '공간 관리',
-  habit: '생활 습관',
-  social: '사회성',
-};
-
 const MatchContact = ({ onRefresh }: MatchContactProps) => {
   const { toast } = useToast();
-  const { setMatchResult, setContact, setLoading } = useMatchStore();
+  const { setContact, setLoading } = useMatchStore();
   const [isLoadingData, setIsLoadingData] = useState(true);
-  const [partnerProperty, setPartnerProperty] = useState<ProfileProperty | null>(null);
-  const [partnerSurvey, setPartnerSurvey] = useState<ProfileSurvey | null>(null);
-  const [compatibilityScore, setCompatibilityScore] = useState<Record<string, number> | null>(null);
-  const [contactInfo, setContactInfo] = useState<{ user_id: string; nickname: string } | null>(null);
+  const [contactInfo, setContactInfo] = useState<{ name: string; phone: string; gender: string; student_id: number } | null>(null);
   const [isRematching, setIsRematching] = useState(false);
   const [rematchDialogOpen, setRematchDialogOpen] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [resultRes, contactRes] = await Promise.all([
-          getMatchResult(),
-          getContact(),
-        ]);
-
-        if (resultRes.success) {
-          setMatchResult(resultRes);
-          setPartnerProperty(resultRes.partner.property);
-          setPartnerSurvey(resultRes.partner.survey);
-          setCompatibilityScore(resultRes.compatibility_score);
-        }
+        const contactRes = await getContact();
 
         if (contactRes.success && contactRes.partner) {
           setContact(contactRes);
@@ -72,7 +50,7 @@ const MatchContact = ({ onRefresh }: MatchContactProps) => {
       } catch {
         toast({
           title: '데이터 로딩 실패',
-          description: '정보를 불러올 수 없습니다.',
+          description: '연락처 정보를 불러올 수 없습니다.',
           variant: 'destructive',
         });
       } finally {
@@ -82,15 +60,8 @@ const MatchContact = ({ onRefresh }: MatchContactProps) => {
     loadData();
   }, []);
 
-  const getRadarData = () => {
-    if (!partnerSurvey?.scores) return [];
-    return surveyCategories
-      .filter((cat) => cat.id !== 'etc')
-      .map((cat) => ({
-        category: cat.name,
-        value: partnerSurvey.scores[categoryNameMap[cat.id]] ?? 0,
-        fullMark: 5,
-      }));
+  const getGenderLabel = (gender: string) => {
+    return gender === 'M' ? '남성' : '여성';
   };
 
   const handleRematch = async () => {
@@ -117,22 +88,16 @@ const MatchContact = ({ onRefresh }: MatchContactProps) => {
     }
   };
 
-  const handleCopyContact = () => {
-    if (contactInfo?.user_id) {
-      navigator.clipboard.writeText(contactInfo.user_id);
-      toast({ title: '복사 완료', description: '연락처가 클립보드에 복사되었습니다.' });
-    }
-  };
-
   if (isLoadingData) {
     return (
       <div className="min-h-screen bg-surface flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">연락처 정보를 불러오는 중...</p>
+        </div>
       </div>
     );
   }
-
-  const overallScore = compatibilityScore?.overall ?? 0;
 
   return (
     <div className="min-h-screen bg-surface py-8 px-4">
@@ -164,132 +129,16 @@ const MatchContact = ({ onRefresh }: MatchContactProps) => {
                   <User className="w-8 h-8 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-foreground">{contactInfo.nickname}</h3>
-                  {partnerProperty && (
-                    <p className="text-muted-foreground text-sm">
-                      {partnerProperty.student_id}학번 · {partnerProperty.dorm_building}동
-                    </p>
-                  )}
+                  <h3 className="text-xl font-bold text-foreground">{contactInfo.name}</h3>
+                  <p className="text-muted-foreground text-sm">
+                    {getGenderLabel(contactInfo.gender)} · {contactInfo.student_id}학번
+                  </p>
                 </div>
               </div>
 
-              <div className="bg-muted/50 rounded-md p-4 space-y-3">
-                <h4 className="font-semibold text-foreground">연락처 정보</h4>
-                <div className="flex items-center justify-between">
-                  <span className="text-foreground">{contactInfo.user_id}</span>
-                  <Button variant="ghost" size="sm" onClick={handleCopyContact}>
-                    <Copy className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-
-              {compatibilityScore && (
-                <div className="mt-4 text-center">
-                  <span className={cn(
-                    'text-2xl font-bold font-mono',
-                    overallScore >= 80 ? 'text-primary' :
-                    overallScore >= 60 ? 'text-yellow-500' :
-                    'text-muted-foreground'
-                  )}>
-                    {overallScore.toFixed(1)}% 유사도
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Partner Profile */}
-          {partnerProperty && partnerSurvey && (
-            <div className="bg-card rounded-md p-6 shadow-md">
-              {/* Badges */}
-              {partnerSurvey.badges && (
-                <div className="flex gap-2 flex-wrap mb-6">
-                  {Object.values(partnerSurvey.badges).map((badge, i) => (
-                    <Badge key={i} variant={i === 0 ? 'default' : 'outline'}>
-                      {badge}
-                    </Badge>
-                  ))}
-                </div>
-              )}
-
-              {/* Radar Chart */}
-              {partnerSurvey.scores && (
-                <div className="h-56 mb-4">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RadarChart data={getRadarData()}>
-                      <PolarGrid stroke="hsl(var(--border))" />
-                      <PolarAngleAxis
-                        dataKey="category"
-                        tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
-                      />
-                      <PolarRadiusAxis
-                        angle={90}
-                        domain={[0, 5]}
-                        tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }}
-                      />
-                      <Radar
-                        name="유사도"
-                        dataKey="value"
-                        stroke="hsl(var(--primary))"
-                        fill="hsl(var(--primary))"
-                        fillOpacity={0.2}
-                        strokeWidth={2}
-                      />
-                    </RadarChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
-
-              {/* Category Bars */}
-              {partnerSurvey.scores && (
-                <div className="space-y-3">
-                  {surveyCategories
-                    .filter((cat) => cat.id !== 'etc')
-                    .map((cat) => {
-                      const score = partnerSurvey.scores[categoryNameMap[cat.id]] ?? 0;
-                      const percentage = (score / 5) * 100;
-                      return (
-                        <div key={cat.id} className="space-y-1">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="text-lg">{cat.icon}</span>
-                              <span className="text-sm font-medium text-foreground">{cat.name}</span>
-                            </div>
-                            <span className="text-sm font-mono font-semibold text-muted-foreground">
-                              {score.toFixed(1)}
-                            </span>
-                          </div>
-                          <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: `${percentage}%` }}
-                              transition={{ duration: 0.5, delay: 0.1 }}
-                              className={cn(
-                                'h-full rounded-full',
-                                cat.id === 'time' && 'bg-chart-1',
-                                cat.id === 'clean' && 'bg-chart-2',
-                                cat.id === 'habit' && 'bg-chart-3',
-                                cat.id === 'social' && 'bg-chart-4'
-                              )}
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
-                </div>
-              )}
-
-              {/* Property Info */}
-              <div className="mt-6 pt-4 border-t border-border">
-                <h4 className="text-sm font-semibold text-foreground mb-3">기본 조건</h4>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div className="text-muted-foreground">흡연</div>
-                  <div className="text-foreground">{partnerProperty.is_smoker ? 'O' : 'X'}</div>
-                  <div className="text-muted-foreground">냉장고</div>
-                  <div className="text-foreground">{partnerProperty.has_fridge ? '보유' : '미보유'}</div>
-                  <div className="text-muted-foreground">공유기</div>
-                  <div className="text-foreground">{partnerProperty.has_router ? '보유' : '미보유'}</div>
-                </div>
+              <div className="mt-6">
+                <h4 className="text-sm font-semibold text-muted-foreground mb-2">연락처 정보</h4>
+                <p className="text-foreground text-2xl font-semibold">{contactInfo.phone}</p>
               </div>
             </div>
           )}

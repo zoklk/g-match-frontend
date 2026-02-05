@@ -66,10 +66,8 @@ const Profile = () => {
     return `${building}동`;
   };
 
-  const getPeriodLabel = (period: number) => {
-    if (period === 1) return '1학기';
-    if (period === 2) return '1년';
-    return `${period}학기`;
+  const getGenderLabel = (gender: string) => {
+    return gender === 'M' ? '남성' : '여성';
   };
 
   if (isLoading || profileStatus < 2) {
@@ -99,7 +97,7 @@ const Profile = () => {
               <div>
                 <h3 className="text-xl font-bold text-foreground">{property?.nickname}</h3>
                 <p className="text-muted-foreground text-sm">
-                  {property ? `${property.student_id}학번${property.dorm_building !== 'A' ? ` · ${getDormLabel(property.dorm_building)}` : ''}` : ''}
+                  {property ? `${getGenderLabel(property.gender)} · ${property.student_id}학번${property.dorm_building !== 'A' ? ` · ${getDormLabel(property.dorm_building)}` : ''}` : ''}
                 </p>
               </div>
             </div>

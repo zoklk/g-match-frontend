@@ -72,11 +72,8 @@ const MatchWaiting = ({ onRefresh }: MatchWaitingProps) => {
           />
 
           <h2 className="text-2xl font-bold text-foreground mb-2">매칭 중...</h2>
-          <p className="text-muted-foreground text-center mb-2">
+          <p className="text-muted-foreground text-center mb-8">
             최적의 룸메이트를 찾고 있습니다
-          </p>
-          <p className="text-sm text-muted-foreground text-center mb-8">
-            대기열에 등록되었습니다. 잠시만 기다려주세요.
           </p>
 
           <Button

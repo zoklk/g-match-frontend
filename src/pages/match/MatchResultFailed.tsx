@@ -9,14 +9,7 @@ import { useMatchStore } from '@/store/matchStore';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileProperty, ProfileSurvey } from '@/types/match';
 import { surveyCategories } from '@/data/surveyQuestions';
-import {
-  Radar,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  ResponsiveContainer,
-} from 'recharts';
+import { ProfileSlider } from '@/components/ProfileSlider';
 
 interface MatchResultFailedProps {
   onRefresh: () => Promise<void>;
@@ -29,13 +22,20 @@ const categoryNameMap: Record<string, string> = {
   social: '사회성',
 };
 
+const categoryColors: Record<string, string> = {
+  time: 'bg-chart-1',
+  clean: 'bg-chart-2',
+  habit: 'bg-chart-3',
+  social: 'bg-chart-4',
+};
+
 const MatchResultFailed = ({ onRefresh }: MatchResultFailedProps) => {
   const { toast } = useToast();
   const { setMatchResult, setLoading } = useMatchStore();
   const [isLoadingResult, setIsLoadingResult] = useState(true);
   const [partnerProperty, setPartnerProperty] = useState<ProfileProperty | null>(null);
   const [partnerSurvey, setPartnerSurvey] = useState<ProfileSurvey | null>(null);
-  const [compatibilityScore, setCompatibilityScore] = useState<Record<string, number> | null>(null);
+  const [compatibilityScore, setCompatibilityScore] = useState<number | null>(null);
   const [isRematching, setIsRematching] = useState(false);
 
   useEffect(() => {
@@ -57,15 +57,10 @@ const MatchResultFailed = ({ onRefresh }: MatchResultFailedProps) => {
     loadResult();
   }, []);
 
-  const getRadarData = () => {
-    if (!partnerSurvey?.scores) return [];
-    return surveyCategories
-      .filter((cat) => cat.id !== 'etc')
-      .map((cat) => ({
-        category: cat.name,
-        value: partnerSurvey.scores[categoryNameMap[cat.id]] ?? 0,
-        fullMark: 5,
-      }));
+  const getDormLabel = (building: string) => `${building}동`;
+
+  const getGenderLabel = (gender: string) => {
+    return gender === 'M' ? '남성' : '여성';
   };
 
   const handleRematch = async () => {
@@ -94,12 +89,23 @@ const MatchResultFailed = ({ onRefresh }: MatchResultFailedProps) => {
   if (isLoadingResult) {
     return (
       <div className="min-h-screen bg-surface flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">매칭 결과 불러오는 중...</p>
+        </div>
       </div>
     );
   }
 
-  const overallScore = compatibilityScore?.overall ?? 0;
+  if (!partnerProperty) {
+    return (
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <p className="text-muted-foreground">매칭 결과를 찾을 수 없습니다.</p>
+      </div>
+    );
+  }
+
+  const overallScore = typeof compatibilityScore === 'number' ? compatibilityScore : 0;
 
   return (
     <div className="min-h-screen bg-surface py-8 px-4">
@@ -125,93 +131,188 @@ const MatchResultFailed = ({ onRefresh }: MatchResultFailedProps) => {
             </p>
           </div>
 
-          {/* Partner Profile (who rejected) */}
-          {partnerProperty && (
-            <div className="bg-card rounded-md p-6 shadow-md opacity-75">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center">
-                  <User className="w-10 h-10 text-muted-foreground" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-foreground">{partnerProperty.nickname}</h3>
-                  <div className={cn(
-                    'text-xl font-bold font-mono mt-1 text-muted-foreground'
-                  )}>
-                    {overallScore.toFixed(1)}% 유사도
-                  </div>
+          {/* Partner Card (who rejected) */}
+          <div className="bg-card rounded-md p-6 shadow-md opacity-75">
+            {/* Avatar and Info */}
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center">
+                <User className="w-10 h-10 text-muted-foreground" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-foreground">{partnerProperty.nickname}</h3>
+                <p className="text-muted-foreground text-sm">
+                  {getGenderLabel(partnerProperty.gender)} · {partnerProperty.student_id}학번 · {getDormLabel(partnerProperty.dorm_building)}
+                </p>
+                <div className={cn(
+                  'text-2xl font-bold font-mono mt-1',
+                  overallScore >= 90 ? 'text-muted-foreground' :
+                  overallScore >= 70 ? 'text-muted-foreground' :
+                  'text-muted-foreground'
+                )}>
+                  {overallScore.toFixed(2)}점
                 </div>
               </div>
+            </div>
 
-              {partnerSurvey?.badges && (
-                <div className="flex gap-2 flex-wrap mb-6">
+            {/* Badges */}
+            {partnerSurvey?.badges && Object.keys(partnerSurvey.badges).length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="mb-8"
+              >
+                <div className="flex gap-2 flex-wrap">
                   {Object.values(partnerSurvey.badges).map((badge, i) => (
-                    <Badge key={i} variant="outline">
+                    <Badge
+                      key={i}
+                      variant="outline"
+                      className="text-sm px-4 py-1.5 border-muted-foreground/50 text-muted-foreground"
+                    >
                       {badge}
                     </Badge>
                   ))}
                 </div>
-              )}
+              </motion.div>
+            )}
 
-              {partnerSurvey?.scores && (
-                <div className="h-56 mb-4">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RadarChart data={getRadarData()}>
-                      <PolarGrid stroke="hsl(var(--border))" />
-                      <PolarAngleAxis
-                        dataKey="category"
-                        tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
-                      />
-                      <PolarRadiusAxis
-                        angle={90}
-                        domain={[0, 5]}
-                        tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }}
-                      />
-                      <Radar
-                        name="유사도"
-                        dataKey="value"
-                        stroke="hsl(var(--muted-foreground))"
-                        fill="hsl(var(--muted-foreground))"
-                        fillOpacity={0.1}
-                        strokeWidth={2}
-                      />
-                    </RadarChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
+            {/* MBTI Style Sliders */}
+            {partnerSurvey?.scores && (
+              <div className="space-y-5">
+                {surveyCategories
+                  .filter((cat) => cat.id !== 'etc')
+                  .map((cat) => {
+                    const score = partnerSurvey.scores[categoryNameMap[cat.id]] ?? 3;
 
-              {partnerSurvey?.scores && (
+                    return (
+                      <motion.div
+                        key={cat.id}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <ProfileSlider
+                          leftLabel={cat.leftAxis}
+                          rightLabel={cat.rightAxis}
+                          categoryName={cat.name}
+                          value={score}
+                          color={categoryColors[cat.id]}
+                        />
+                      </motion.div>
+                    );
+                  })}
+              </div>
+            )}
+
+            {/* Property Info */}
+            {partnerProperty && (
+              <div className="mt-8 pt-4 border-t border-border">
+                <h4 className="text-sm font-semibold text-foreground mb-4">기본 정보</h4>
                 <div className="space-y-3">
-                  {surveyCategories
-                    .filter((cat) => cat.id !== 'etc')
-                    .map((cat) => {
-                      const score = partnerSurvey.scores[categoryNameMap[cat.id]] ?? 0;
-                      const percentage = (score / 5) * 100;
-                      return (
-                        <div key={cat.id} className="space-y-1">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="text-lg">{cat.icon}</span>
-                              <span className="text-sm font-medium text-foreground">{cat.name}</span>
-                            </div>
-                            <span className="text-sm font-mono font-semibold text-muted-foreground">
-                              {score.toFixed(1)}
-                            </span>
-                          </div>
-                          <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: `${percentage}%` }}
-                              transition={{ duration: 0.5, delay: 0.1 }}
-                              className="h-full rounded-full bg-muted-foreground/30"
-                            />
-                          </div>
+                  {/* 희망 거주기간 */}
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm text-muted-foreground w-16">거주기간</span>
+                    <div className="flex gap-2">
+                      {[1, 2, 3, 4].map((period) => (
+                        <div
+                          key={period}
+                          className={cn(
+                            "px-3 py-2 rounded-md text-sm font-medium border-2 transition-colors",
+                            partnerProperty.stay_period === period
+                              ? "border-muted-foreground bg-muted text-foreground"
+                              : "border-border bg-background text-muted-foreground"
+                          )}
+                        >
+                          {period === 4 ? '4학기+' : `${period}학기`}
                         </div>
-                      );
-                    })}
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 흡연 */}
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm text-muted-foreground w-16">흡연</span>
+                    <div className="flex gap-2">
+                      <div
+                        className={cn(
+                          "px-4 py-2 rounded-md text-sm font-medium border-2 transition-colors",
+                          partnerProperty.is_smoker
+                            ? "border-muted-foreground bg-muted text-foreground"
+                            : "border-border bg-background text-muted-foreground"
+                        )}
+                      >
+                        O
+                      </div>
+                      <div
+                        className={cn(
+                          "px-4 py-2 rounded-md text-sm font-medium border-2 transition-colors",
+                          !partnerProperty.is_smoker
+                            ? "border-muted-foreground bg-muted text-foreground"
+                            : "border-border bg-background text-muted-foreground"
+                        )}
+                      >
+                        X
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 냉장고 */}
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm text-muted-foreground w-16">냉장고</span>
+                    <div className="flex gap-2">
+                      <div
+                        className={cn(
+                          "px-4 py-2 rounded-md text-sm font-medium border-2 transition-colors",
+                          partnerProperty.has_fridge
+                            ? "border-muted-foreground bg-muted text-foreground"
+                            : "border-border bg-background text-muted-foreground"
+                        )}
+                      >
+                        O
+                      </div>
+                      <div
+                        className={cn(
+                          "px-4 py-2 rounded-md text-sm font-medium border-2 transition-colors",
+                          !partnerProperty.has_fridge
+                            ? "border-muted-foreground bg-muted text-foreground"
+                            : "border-border bg-background text-muted-foreground"
+                        )}
+                      >
+                        X
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 공유기 */}
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm text-muted-foreground w-16">공유기</span>
+                    <div className="flex gap-2">
+                      <div
+                        className={cn(
+                          "px-4 py-2 rounded-md text-sm font-medium border-2 transition-colors",
+                          partnerProperty.has_router
+                            ? "border-muted-foreground bg-muted text-foreground"
+                            : "border-border bg-background text-muted-foreground"
+                        )}
+                      >
+                        O
+                      </div>
+                      <div
+                        className={cn(
+                          "px-4 py-2 rounded-md text-sm font-medium border-2 transition-colors",
+                          !partnerProperty.has_router
+                            ? "border-muted-foreground bg-muted text-foreground"
+                            : "border-border bg-background text-muted-foreground"
+                        )}
+                      >
+                        X
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              )}
-            </div>
-          )}
+              </div>
+            )}
+          </div>
 
           {/* Rematch Button */}
           <Button

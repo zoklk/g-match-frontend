@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useMatchStore } from '@/store/matchStore';
 import { getMatchStatus } from '@/api/match';
@@ -14,6 +14,7 @@ import MatchContactFailed from './MatchContactFailed';
 const MatchRouter = () => {
   const { matchStatus, setMatchStatus, setLoading, isLoading } = useMatchStore();
   const [initialLoad, setInitialLoad] = useState(true);
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchStatus = async () => {
     setLoading(true);
@@ -30,9 +31,42 @@ const MatchRouter = () => {
     }
   };
 
+  // 초기 로드
   useEffect(() => {
     fetchStatus();
   }, []);
+
+  // IN_QUEUE 상태일 때 5초마다 폴링
+  useEffect(() => {
+    const clearPolling = () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+    };
+
+    if (matchStatus === MatchStatus.IN_QUEUE) {
+      pollingIntervalRef.current = setInterval(async () => {
+        try {
+          const res = await getMatchStatus();
+          if (res.success) {
+            setMatchStatus(res.match_status);
+            if (res.match_status !== MatchStatus.IN_QUEUE) {
+              clearPolling();
+            }
+          }
+        } catch {
+          // 에러 발생 시 폴링 계속
+        }
+      }, 5000);
+    } else {
+      clearPolling();
+    }
+
+    return () => {
+      clearPolling();
+    };
+  }, [matchStatus, setMatchStatus]);
 
   if (initialLoad || isLoading) {
     return (

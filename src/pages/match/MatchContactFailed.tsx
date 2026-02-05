@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { User, Loader2, RotateCcw, UserX, Copy } from 'lucide-react';
+import { User, Loader2, RotateCcw, UserX } from 'lucide-react';
 import { getContact, rematch as rematchApi } from '@/api/match';
 import { useMatchStore } from '@/store/matchStore';
 import { useToast } from '@/hooks/use-toast';
@@ -14,7 +14,7 @@ const MatchContactFailed = ({ onRefresh }: MatchContactFailedProps) => {
   const { toast } = useToast();
   const { setContact, setLoading } = useMatchStore();
   const [isLoadingData, setIsLoadingData] = useState(true);
-  const [contactInfo, setContactInfo] = useState<{ user_id: string; nickname: string } | null>(null);
+  const [contactInfo, setContactInfo] = useState<{ name: string; phone: string; gender: string; student_id: number } | null>(null);
   const [isRematching, setIsRematching] = useState(false);
 
   useEffect(() => {
@@ -26,13 +26,21 @@ const MatchContactFailed = ({ onRefresh }: MatchContactFailedProps) => {
           setContactInfo(contactRes.partner);
         }
       } catch {
-        // 연락처 로딩 실패
+        toast({
+          title: '데이터 로딩 실패',
+          description: '연락처 정보를 불러올 수 없습니다.',
+          variant: 'destructive',
+        });
       } finally {
         setIsLoadingData(false);
       }
     };
     loadData();
   }, []);
+
+  const getGenderLabel = (gender: string) => {
+    return gender === 'M' ? '남성' : '여성';
+  };
 
   const handleRematch = async () => {
     setIsRematching(true);
@@ -57,17 +65,13 @@ const MatchContactFailed = ({ onRefresh }: MatchContactFailedProps) => {
     }
   };
 
-  const handleCopyContact = () => {
-    if (contactInfo?.user_id) {
-      navigator.clipboard.writeText(contactInfo.user_id);
-      toast({ title: '복사 완료', description: '연락처가 클립보드에 복사되었습니다.' });
-    }
-  };
-
   if (isLoadingData) {
     return (
       <div className="min-h-screen bg-surface flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">연락처 정보를 불러오는 중...</p>
+        </div>
       </div>
     );
   }
@@ -96,27 +100,24 @@ const MatchContactFailed = ({ onRefresh }: MatchContactFailedProps) => {
             </p>
           </div>
 
-          {/* Contact Info (still visible) */}
+          {/* Contact Card (still visible) */}
           {contactInfo && (
-            <div className="bg-card rounded-md p-6 shadow-md">
+            <div className="bg-card rounded-md p-6 shadow-md opacity-75">
               <div className="flex items-center gap-4 mb-4">
                 <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center">
                   <User className="w-8 h-8 text-muted-foreground" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-foreground">{contactInfo.nickname}</h3>
-                  <p className="text-sm text-muted-foreground">이전 매칭 상대</p>
+                  <h3 className="text-xl font-bold text-foreground">{contactInfo.name}</h3>
+                  <p className="text-muted-foreground text-sm">
+                    {getGenderLabel(contactInfo.gender)} · {contactInfo.student_id}학번
+                  </p>
                 </div>
               </div>
 
-              <div className="bg-muted/50 rounded-md p-4">
-                <h4 className="font-semibold text-foreground mb-2">연락처 정보</h4>
-                <div className="flex items-center justify-between">
-                  <span className="text-foreground">{contactInfo.user_id}</span>
-                  <Button variant="ghost" size="sm" onClick={handleCopyContact}>
-                    <Copy className="w-4 h-4" />
-                  </Button>
-                </div>
+              <div className="mt-6">
+                <h4 className="text-sm font-semibold text-muted-foreground mb-2">연락처 정보</h4>
+                <p className="text-foreground text-2xl font-semibold">{contactInfo.phone}</p>
               </div>
             </div>
           )}

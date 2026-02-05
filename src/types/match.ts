@@ -144,10 +144,7 @@ export interface MatchResultResponse {
   success: boolean;
   match_status: MatchStatus;
   match_id: number;
-  compatibility_score: {
-    overall: number;
-    [category: string]: number;
-  };
+  compatibility_score: number; // FloatField (120점 만점)
   partner: {
     property: ProfileProperty;
     survey: ProfileSurvey;
@@ -159,8 +156,10 @@ export interface ContactResponse {
   success: boolean;
   match_status: MatchStatus;
   partner?: {
-    user_id: string;
-    nickname: string;
+    name: string;
+    phone: string;
+    gender: string;
+    student_id: number;
   };
   error?: string;
 }
