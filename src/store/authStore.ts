@@ -56,11 +56,14 @@ export const useAuthStore = create<AuthState>()(
             set({ user, isLoggedIn: true, isLoading: false });
             return true;
           }
+          // B/E가 success=false 또는 user 없음 → 세션 무효
+          set({ user: null, isLoggedIn: false, isLoading: false });
+          return false;
         } catch {
-          set({ user: null, isLoggedIn: false });
+          // 401 등 에러 → 세션 만료
+          set({ user: null, isLoggedIn: false, isLoading: false });
+          return false;
         }
-        set({ isLoading: false });
-        return false;
       },
     }),
     {

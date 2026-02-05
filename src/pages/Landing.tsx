@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,7 +8,15 @@ import { toast } from 'sonner';
 
 const Landing = () => {
   const navigate = useNavigate();
-  const { isLoggedIn } = useAuthStore();
+  const { isLoggedIn, checkAuth } = useAuthStore();
+
+  // 마운트 시 B/E에 세션 유효성 검증
+  // localStorage에 isLoggedIn=true가 남아있어도 실제 세션이 만료되었을 수 있음
+  useEffect(() => {
+    if (isLoggedIn) {
+      checkAuth();
+    }
+  }, []);
 
   const handleAuthClick = () => {
     if (isLoggedIn) {

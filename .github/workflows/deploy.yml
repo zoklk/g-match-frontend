@@ -1,3 +1,18 @@
+# =============================================================================
+# G-Match Frontend CI/CD — Build & Deploy to S3
+#
+# ▸ 트리거 조건:
+#   main 브랜치에 push
+#
+# ▸ 빌드 시 주입되는 환경변수 (VITE_* → 번들에 인라인):
+#   - VITE_API_URL:       Prod B/E API 주소
+#   - VITE_CSRF_ENABLED:  CSRF 토큰 전송 활성화 (true)
+#
+# ▸ 필요한 GitHub Repository Secrets:
+#   - AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+#   - AWS_S3_BUCKET
+#   - CLOUDFRONT_DISTRIBUTION_ID (선택 — 캐시 무효화용)
+# =============================================================================
 name: Build and Deploy to S3
 
 on:
@@ -28,6 +43,8 @@ jobs:
         run: npm run build
         env:
           NODE_ENV: production
+          VITE_API_URL: https://api.g-match.org/api/v1alpha1
+          VITE_CSRF_ENABLED: 'true'
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -40,3 +57,10 @@ jobs:
         run: |
           aws s3 sync dist/ s3://${{ secrets.AWS_S3_BUCKET }} \
             --delete
+
+      - name: Invalidate CloudFront cache
+        if: env.CLOUDFRONT_DISTRIBUTION_ID != ''
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" \
+            --paths "/*"

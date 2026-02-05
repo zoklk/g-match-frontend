@@ -8,25 +8,22 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { isLoggedIn, isLoading, checkAuth } = useAuthStore();
+  const { isLoading, checkAuth } = useAuthStore();
   const location = useLocation();
   const [checking, setChecking] = useState(true);
+  const [isValid, setIsValid] = useState(false);
 
   useEffect(() => {
     const verify = async () => {
-      // 이미 로그인 상태가 확인된 경우 스킵
-      if (isLoggedIn) {
-        setChecking(false);
-        return;
-      }
-
-      // 서버에서 인증 상태 확인
-      await checkAuth();
+      // 항상 서버에서 인증 상태를 확인
+      // (localStorage의 isLoggedIn만 믿지 않고, B/E 세션 유효성을 검증)
+      const result = await checkAuth();
+      setIsValid(result);
       setChecking(false);
     };
 
     verify();
-  }, [isLoggedIn, checkAuth]);
+  }, [checkAuth]);
 
   // 인증 확인 중
   if (checking || isLoading) {
@@ -41,7 +38,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   }
 
   // 비로그인 상태 - 로그인 페이지로 리다이렉트
-  if (!isLoggedIn) {
+  if (!isValid) {
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 

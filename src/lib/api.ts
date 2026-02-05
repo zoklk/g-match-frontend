@@ -2,10 +2,20 @@ import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1alpha1';
 
+// CSRF 설정
+// Prod (S3 배포): VITE_CSRF_ENABLED=true → csrftoken 쿠키 → X-CSRFToken 헤더 자동 전송
+// Dev (로컬):     미설정 → CSRF 비활성 (B/E도 CSRF_ENABLED=False)
+const CSRF_ENABLED = import.meta.env.VITE_CSRF_ENABLED === 'true';
+
+const csrfConfig = CSRF_ENABLED
+  ? { xsrfCookieName: 'csrftoken', xsrfHeaderName: 'X-CSRFToken' }
+  : {};
+
 // 기본 API 클라이언트
 export const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true, // 쿠키(세션) 전송 필수
+  ...csrfConfig,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -15,6 +25,7 @@ export const api = axios.create({
 export const registrationApi = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
+  ...csrfConfig,
   headers: {
     'Content-Type': 'application/json',
   },
