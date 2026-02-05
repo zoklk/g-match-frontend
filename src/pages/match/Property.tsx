@@ -17,12 +17,13 @@ const Property = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 진입 시 기존 property 불러오기 (재작성 시 기본값)
+  // 진입 시 profile 상태 확인 및 기존 property 불러오기
   useEffect(() => {
     const loadExisting = async () => {
       try {
         const res = await getProperty();
-        if (res.success && res.property) {
+        if (res.success && res.property && res.success) {
+          // 기존 property가 있으면 불러오기 (재작성 시 기본값)
           setPropertyData({
             dorm_building: res.property.dorm_building as PropertyRequest['dorm_building'],
             stay_period: res.property.stay_period as PropertyRequest['stay_period'],

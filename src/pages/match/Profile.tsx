@@ -227,7 +227,7 @@ const Profile = () => {
               onClick={() => navigate('/match/profile/property')}
             >
               <Edit className="w-4 h-4 mr-2" />
-              프로필 수정하기
+              기본정보 수정하기
             </Button>
             <Button
               variant="outline"
@@ -235,7 +235,7 @@ const Profile = () => {
               onClick={() => navigate('/match/profile/survey')}
             >
               <RefreshCw className="w-4 h-4 mr-2" />
-              설문 다시하기
+              설문 수정하기
             </Button>
             <Button className="w-full" onClick={() => navigate('/match')}>
               <ArrowRight className="w-4 h-4 mr-2" />

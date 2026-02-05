@@ -14,12 +14,13 @@ const Survey = () => {
   const { surveyAnswers, setSurveyAnswer, setSurveyAnswers } = useProfileStore();
   const [isLoading, setIsLoading] = useState(true);
 
-  // 진입 시 기존 survey 불러오기
+  // 진입 시 profile 상태 확인 및 기존 survey 불러오기
   useEffect(() => {
     const loadExisting = async () => {
       try {
         const res = await getSurvey();
         if (res.success && res.survey) {
+          // 기존 survey가 있으면 불러오기 (재작성 시 기본값)
           setSurveyAnswers(res.survey.surveys);
         }
       } catch {
@@ -38,7 +39,7 @@ const Survey = () => {
     }));
   }, []);
 
-  const answeredCount = Object.keys(surveyAnswers).length;
+  const answeredCount = Object.keys(surveyAnswers || {}).length;
   const totalCount = surveyQuestions.length;
   const allAnswered = answeredCount === totalCount;
   const progress = Math.round((answeredCount / totalCount) * 100);
@@ -67,7 +68,7 @@ const Survey = () => {
           </div>
 
           {/* Progress */}
-          <div className="mb-6">
+          <div className="sticky top-0 bg-surface/95 backdrop-blur-sm py-3 -mx-4 px-4 z-20 mb-6">
             <div className="flex justify-between text-sm text-muted-foreground mb-2">
               <span>진행률</span>
               <span>{progress}%</span>
@@ -87,7 +88,7 @@ const Survey = () => {
             <div className="flex gap-2 justify-center flex-wrap">
               {surveyCategories.map((category) => {
                 const catQuestions = surveyQuestions.filter((q) => q.category === category.id);
-                const catAnswered = catQuestions.filter((q) => surveyAnswers[q.id] !== undefined).length;
+                const catAnswered = catQuestions.filter((q) => (surveyAnswers && surveyAnswers[q.id]) !== undefined).length;
                 const isComplete = catAnswered === catQuestions.length;
 
                 return (
@@ -96,32 +97,25 @@ const Survey = () => {
                     variant={isComplete ? 'default' : 'outline'}
                     className={cn('transition-all', isComplete && 'bg-primary')}
                   >
-                    {category.icon} {category.name} ({catAnswered}/{catQuestions.length})
+                    {category.name} ({catAnswered}/{catQuestions.length})
                   </Badge>
                 );
               })}
             </div>
           </div>
 
+
           {/* Questions by category */}
           <div className="space-y-8 mt-4">
             {questionsByCategory.map((category) => (
               <div key={category.id} className="space-y-4">
-                <div className="flex items-center gap-3 pb-2 border-b border-border">
-                  <span className="text-2xl">{category.icon}</span>
-                  <div>
-                    <h3 className="text-lg font-semibold text-foreground">{category.name}</h3>
-                    {category.leftAxis && (
-                      <p className="text-sm text-muted-foreground">
-                        {category.leftAxis} ←→ {category.rightAxis}
-                      </p>
-                    )}
-                  </div>
+                <div className="pb-2 border-b border-border">
+                  <h3 className="text-lg font-semibold text-foreground">{category.name}</h3>
                 </div>
 
                 <div className="space-y-4">
                   {category.questions.map((question, index) => {
-                    const isAnswered = surveyAnswers[question.id] !== undefined;
+                    const isAnswered = (surveyAnswers && surveyAnswers[question.id]) !== undefined;
 
                     return (
                       <div
@@ -156,7 +150,7 @@ const Survey = () => {
                               onClick={() => setSurveyAnswer(question.id, val)}
                               className={cn(
                                 'px-3 py-2 rounded-sm text-sm font-medium transition-all border-2 flex-1 min-w-[60px]',
-                                surveyAnswers[question.id] === val
+                                (surveyAnswers && surveyAnswers[question.id]) === val
                                   ? 'border-primary bg-primary text-primary-foreground'
                                   : 'border-border bg-background text-foreground hover:border-primary/50'
                               )}
@@ -184,7 +178,7 @@ const Survey = () => {
               이전
             </Button>
             <Button onClick={handleNext} disabled={!allAnswered}>
-              다음: 가중치 설정
+              다음: 우선순위 설정
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>

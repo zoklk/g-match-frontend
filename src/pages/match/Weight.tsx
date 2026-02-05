@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Check, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useProfileStore } from '@/store/profileStore';
-import { getSurvey, submitSurvey } from '@/api/match';
+import { getProfileStatus, submitSurvey } from '@/api/match';
 import { surveyQuestions, surveyCategories, SURVEY_REQUIRED_KEYS } from '@/data/surveyQuestions';
 import { useToast } from '@/hooks/use-toast';
 
@@ -22,11 +22,11 @@ const Weight = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 진입 시 기존 weights 불러오기
+  // 진입 시 profile 상태 확인 및 기존 weights 불러오기
   useEffect(() => {
     const loadExisting = async () => {
       try {
-        const res = await getSurvey();
+        const res = await getProfileStatus();
         if (res.success && res.survey) {
           setSurveyWeights(res.survey.weights);
         } else {
@@ -71,7 +71,7 @@ const Weight = () => {
       (key) => surveyWeights[key] !== undefined
     );
     if (!allWeightsSet) {
-      toast({ title: '가중치를 모두 설정해주세요.', variant: 'destructive' });
+      toast({ title: '우선순위를 모두 설정해주세요.', variant: 'destructive' });
       return;
     }
 
@@ -107,28 +107,18 @@ const Weight = () => {
       <div className="max-w-2xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-foreground mb-2">가중치 설정</h2>
+            <h2 className="text-2xl font-bold text-foreground mb-2">우선순위 설정</h2>
             <p className="text-muted-foreground">
-              본인에게 중요한 항목에 더 높은 가중치를 설정하세요
+              본인에게 중요한 항목에 더 높은 우선순위를 설정하세요
             </p>
           </div>
 
-          <div className="bg-muted/50 rounded-md p-4 text-sm text-muted-foreground mb-6">
-            <p>💡 기본값은 x1.0입니다. 중요한 항목은 x1.5로, 덜 중요한 항목은 x0.5로 조정하세요.</p>
-          </div>
+
 
           {questionsByCategory.map((category) => (
             <div key={category.id} className="space-y-3 mb-6">
-              <div className="flex items-center gap-3 pb-2 border-b border-border">
-                <span className="text-2xl">{category.icon}</span>
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground">{category.name}</h3>
-                  {category.leftAxis && (
-                    <p className="text-sm text-muted-foreground">
-                      {category.leftAxis} ↔ {category.rightAxis}
-                    </p>
-                  )}
-                </div>
+              <div className="pb-2 border-b border-border">
+                <h3 className="text-lg font-semibold text-foreground">{category.name}</h3>
               </div>
 
               <div className="space-y-2">

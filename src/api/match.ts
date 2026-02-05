@@ -22,7 +22,10 @@ export const getProfileStatus = async (): Promise<ProfileStatusResponse> => {
   return response.data;
 };
 
-/** 기존 property 조회 (재작성 시 기본값용) */
+// NOTE: getProperty()와 getSurvey()는 더 이상 사용하지 않습니다.
+// 대신 getProfileStatus()를 사용하여 profile_status와 함께 property, survey 데이터를 받아옵니다.
+
+/** 기존 property 조회 (재작성 시 기본값용) - DEPRECATED */
 export const getProperty = async (): Promise<GetPropertyResponse> => {
   const response = await api.get<GetPropertyResponse>('/match/profile/property/');
   return response.data;
@@ -34,7 +37,7 @@ export const submitProperty = async (data: PropertyRequest): Promise<SubmitPrope
   return response.data;
 };
 
-/** 기존 survey 조회 (재작성 시 기본값용) */
+// /** 기존 survey 조회 (재작성 시 기본값용) - DEPRECATED */
 export const getSurvey = async (): Promise<GetSurveyResponse> => {
   const response = await api.get<GetSurveyResponse>('/match/profile/survey/');
   return response.data;
