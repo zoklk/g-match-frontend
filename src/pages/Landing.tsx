@@ -1,10 +1,32 @@
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Users, Target, Heart, Shield } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
+import { toast } from 'sonner';
 
 const Landing = () => {
   const navigate = useNavigate();
+  const { isLoggedIn, checkAuth } = useAuthStore();
+
+  // 마운트 시 B/E에 세션 유효성 검증
+  // localStorage에 isLoggedIn=true가 남아있어도 실제 세션이 만료되었을 수 있음
+  useEffect(() => {
+    if (isLoggedIn) {
+      checkAuth();
+    }
+  }, []);
+
+  const handleAuthClick = () => {
+    if (isLoggedIn) {
+      toast.info('이미 로그인 된 상태입니다', {
+        duration: 5000,
+      });
+    } else {
+      navigate('/auth');
+    }
+  };
 
   const features = [
     {
@@ -49,6 +71,11 @@ const Landing = () => {
               GIST 학생을 위한 룸메이트 매칭
             </div>
             
+            {/* Logo */}
+            <div className="flex justify-center mb-6">
+              <img src="/logo.png" alt="G-Match" className="h-16 md:h-20 w-auto" />
+            </div>
+
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
               완벽한 룸메이트,
               <br />
@@ -62,22 +89,36 @@ const Landing = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                variant="hero"
-                size="xl"
-                onClick={() => navigate('/auth')}
-                className="group"
-              >
-                시작하기
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Button>
-              <Button
-                variant="outline"
-                size="xl"
-                onClick={() => navigate('/auth?mode=login')}
-              >
-                로그인
-              </Button>
+              {isLoggedIn ? (
+                <Button
+                  variant="hero"
+                  size="xl"
+                  onClick={() => navigate('/match')}
+                  className="group"
+                >
+                  매칭하기
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    variant="hero"
+                    size="xl"
+                    onClick={handleAuthClick}
+                    className="group"
+                  >
+                    시작하기
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="xl"
+                    onClick={handleAuthClick}
+                  >
+                    로그인
+                  </Button>
+                </>
+              )}
             </div>
           </motion.div>
 
@@ -208,10 +249,10 @@ const Landing = () => {
             <Button
               variant="heroOutline"
               size="xl"
-              onClick={() => navigate('/auth')}
+              onClick={isLoggedIn ? () => navigate('/match') : handleAuthClick}
               className="group"
             >
-              무료로 시작하기
+              {isLoggedIn ? '매칭하기' : '무료로 시작하기'}
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
           </motion.div>
@@ -221,7 +262,7 @@ const Landing = () => {
       {/* Footer */}
       <footer className="py-8 border-t border-border">
         <div className="container mx-auto px-4 text-center text-muted-foreground text-sm">
-          <p>© 2024 G-Match. GIST 학생을 위한 룸메이트 매칭 서비스</p>
+          <p>© 2026 G-Match. GIST 학생을 위한 룸메이트 매칭 서비스</p>
         </div>
       </footer>
     </div>
