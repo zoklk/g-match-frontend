@@ -21,11 +21,11 @@ export interface SurveyCategory {
 }
 
 export const surveyCategories: SurveyCategory[] = [
-  { id: 'time', name: '생활 리듬', icon: '', leftAxis: '', rightAxis: '' },
-  { id: 'clean', name: '공간 관리', icon: '', leftAxis: '', rightAxis: '' },
-  { id: 'habit', name: '생활 습관', icon: '', leftAxis: '', rightAxis: '' },
-  { id: 'social', name: '사회성', icon: '', leftAxis: '', rightAxis: '' },
-  { id: 'etc', name: '생활 기타', icon: '', leftAxis: '', rightAxis: '' },
+  { id: 'time', name: '생활 리듬', icon: '🌙', leftAxis: '아침형', rightAxis: '저녁형' },
+  { id: 'clean', name: '공간 관리', icon: '🧹', leftAxis: '편안함', rightAxis: '깔끔함' },
+  { id: 'habit', name: '생활 습관', icon: '🎧', leftAxis: '조용함', rightAxis: '활동적' },
+  { id: 'social', name: '사회성', icon: '👥', leftAxis: '독립적', rightAxis: '사교적' },
+  { id: 'etc', name: '생활 기타', icon: '✨', leftAxis: '', rightAxis: '' },
 ];
 
 export const surveyQuestions: Question[] = [

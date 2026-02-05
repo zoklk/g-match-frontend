@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Check, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useProfileStore } from '@/store/profileStore';
-import { getProfileStatus, submitSurvey } from '@/api/match';
+import { getSurvey, submitSurvey } from '@/api/match';
 import { surveyQuestions, surveyCategories, SURVEY_REQUIRED_KEYS } from '@/data/surveyQuestions';
 import { useToast } from '@/hooks/use-toast';
 
@@ -22,12 +22,12 @@ const Weight = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 진입 시 profile 상태 확인 및 기존 weights 불러오기
+  // 진입 시 기존 weights 불러오기
   useEffect(() => {
     const loadExisting = async () => {
       try {
-        const res = await getProfileStatus();
-        if (res.success && res.survey) {
+        const res = await getSurvey();
+        if (res.success && res.survey?.weights) {
           setSurveyWeights(res.survey.weights);
         } else {
           // 기존 가중치 없으면 기본값 1.0으로 세팅
@@ -123,7 +123,7 @@ const Weight = () => {
 
               <div className="space-y-2">
                 {category.questions.map((question, index) => {
-                  const currentWeight = surveyWeights[question.id] ?? 1.0;
+                  const currentWeight = surveyWeights?.[question.id] ?? 1.0;
 
                   return (
                     <div key={question.id} className="bg-card rounded-md p-4 shadow-sm border border-border">
