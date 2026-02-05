@@ -7,7 +7,7 @@ import { transformUserResponse } from '@/types/auth';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Loader2, User, Home, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Loader2, User, Smile, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const RegisterBasicInfo = () => {
@@ -16,7 +16,7 @@ const RegisterBasicInfo = () => {
   const { registrationToken, setUser, clearRegistrationToken } = useAuthStore();
 
   const [gender, setGender] = useState<'M' | 'F' | null>(null);
-  const [house, setHouse] = useState('');
+  const [nickname, setNickname] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -46,7 +46,7 @@ const RegisterBasicInfo = () => {
       const response = await submitBasicInfo(
         {
           gender,
-          house: house.trim() || undefined,
+          nickname: nickname.trim() || undefined,
         },
         registrationToken
       );
@@ -54,7 +54,7 @@ const RegisterBasicInfo = () => {
       if (response.success && response.user) {
         // 사용자 정보 변환 및 저장
         const user = transformUserResponse({
-          uid: response.user.uid,
+          user_id: response.user.user_id,
           email: response.user.email,
           name: response.user.name,
           student_id: response.user.student_id,
@@ -182,25 +182,25 @@ const RegisterBasicInfo = () => {
             )}
           </div>
 
-          {/* 기숙사 동 (선택) */}
+          {/* 닉네임 (선택) */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <Home className="w-4 h-4 text-primary" />
-              <Label htmlFor="house" className="text-base font-semibold">
-                기숙사 동 <span className="text-muted-foreground text-sm">(선택)</span>
+              <Smile className="w-4 h-4 text-primary" />
+              <Label htmlFor="nickname" className="text-base font-semibold">
+                닉네임 <span className="text-muted-foreground text-sm">(선택)</span>
               </Label>
             </div>
             <Input
-              id="house"
+              id="nickname"
               type="text"
-              placeholder="예: A동, B동, ..."
-              value={house}
-              onChange={(e) => setHouse(e.target.value)}
+              placeholder="사용할 닉네임을 입력하세요"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
               className="h-12"
-              maxLength={50}
+              maxLength={20}
             />
             <p className="text-sm text-muted-foreground">
-              매칭에 활용될 수 있습니다
+              나중에 프로필에서 변경할 수 있습니다
             </p>
           </div>
 

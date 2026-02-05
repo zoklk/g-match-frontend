@@ -89,7 +89,7 @@ export const agreeTerms = async (
 /**
  * 기본정보 입력 및 회원가입 완료 (Step 2)
  * - gender: 필수 (M 또는 F)
- * - house: 선택
+ * - nickname: 선택 (최대 20자)
  */
 export const submitBasicInfo = async (
   data: BasicInfoRequest,

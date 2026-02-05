@@ -3,7 +3,7 @@
 // ============================================
 
 export interface User {
-  uid: string;
+  userId: string;
   email: string;
   name: string;
   studentId?: string;
@@ -17,7 +17,7 @@ export interface User {
 
 // 백엔드 응답 원본 (snake_case)
 export interface UserResponse {
-  uid: string;
+  user_id: string;
   email: string;
   name: string;
   student_id?: string;
@@ -80,14 +80,14 @@ export interface AgreeTermsResponse {
 
 export interface BasicInfoRequest {
   gender: 'M' | 'F';  // 필수
-  house?: string;      // 선택
+  nickname?: string;   // 선택
 }
 
 export interface BasicInfoResponse {
   success: true;
   message: string;
   user: {
-    uid: string;
+    user_id: string;
     email: string;
     name: string;
     student_id?: string;
@@ -143,7 +143,7 @@ export interface ApiErrorResponse {
 
 export function transformUserResponse(response: UserResponse): User {
   return {
-    uid: response.uid,
+    userId: response.user_id,
     email: response.email,
     name: response.name,
     studentId: response.student_id,
