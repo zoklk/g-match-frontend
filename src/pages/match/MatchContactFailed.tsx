@@ -96,7 +96,7 @@ const MatchContactFailed = ({ onRefresh }: MatchContactFailedProps) => {
             </motion.div>
             <h2 className="text-2xl font-bold text-foreground mb-2">상대방이 재매칭했습니다</h2>
             <p className="text-muted-foreground">
-              상대방이 재매칭을 요청했습니다. 아래에 기존 연락처가 남아있습니다.
+              아쉽지만 상대방이 매칭을 취소했습니다. 재매칭을 시도해보세요!
             </p>
           </div>
 

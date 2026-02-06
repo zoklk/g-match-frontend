@@ -84,13 +84,6 @@ const Property = () => {
           </div>
 
           {/* Info Banner */}
-          <div className="bg-primary/10 border border-primary/20 rounded-md p-4 flex items-start gap-3 mb-6">
-            <Info className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-foreground">
-              이 정보는 룸메이트 매칭 시 필수로 충족되어야 하는 조건입니다.
-            </p>
-          </div>
-
           <div className="grid gap-6">
             {propertyQuestions.map((item) => (
               <div key={item.id} className="space-y-3">

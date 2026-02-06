@@ -133,7 +133,7 @@ const MatchLayout = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1">
         <Outlet />
       </main>
     </div>
