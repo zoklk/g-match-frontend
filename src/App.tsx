@@ -21,6 +21,9 @@ import Profile from "./pages/match/Profile";
 // Match - Matching flow
 import MatchRouter from "./pages/match/MatchRouter";
 
+// Match - MyPage
+import MyPage from "./pages/match/MyPage";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -45,6 +48,9 @@ const App = () => (
               </ProtectedRoute>
             }
           >
+            {/* MyPage */}
+            <Route path="/match/mypage" element={<MyPage />} />
+
             {/* Profile flow */}
             <Route path="/match/profile" element={<Profile />} />
             <Route path="/match/profile/property" element={<Property />} />
