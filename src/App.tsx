@@ -4,10 +4,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Landing from "./pages/Landing";
-import Auth from "./pages/Auth";
-import AuthCallback from "./pages/AuthCallback";
-import RegisterAgree from "./pages/RegisterAgree";
-import RegisterBasicInfo from "./pages/RegisterBasicInfo";
+import Auth from "./pages/account/Auth";
+import AuthCallback from "./pages/account/AuthCallback";
+import RegisterAgree from "./pages/account/RegisterAgree";
+import RegisterBasicInfo from "./pages/account/RegisterBasicInfo";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import MatchLayout from "./components/MatchLayout";
@@ -20,6 +20,10 @@ import Profile from "./pages/match/Profile";
 
 // Match - Matching flow
 import MatchRouter from "./pages/match/MatchRouter";
+
+// Account - MyPage
+import MyPage from "./pages/account/MyPage";
+import AccountRecovery from "./pages/account/AccountRecovery";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +40,7 @@ const App = () => (
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/register/agree" element={<RegisterAgree />} />
           <Route path="/register/basic-info" element={<RegisterBasicInfo />} />
+          <Route path="/account/recovery" element={<AccountRecovery />} />
 
           {/* Protected Routes with Sidebar Layout */}
           <Route
@@ -45,6 +50,9 @@ const App = () => (
               </ProtectedRoute>
             }
           >
+            {/* MyPage (Account) */}
+            <Route path="/account/mypage" element={<MyPage />} />
+
             {/* Profile flow */}
             <Route path="/match/profile" element={<Profile />} />
             <Route path="/match/profile/property" element={<Property />} />
@@ -52,7 +60,7 @@ const App = () => (
             <Route path="/match/profile/weight" element={<Weight />} />
 
             {/* Matching flow */}
-            <Route path="/match" element={<MatchRouter />} />
+            <Route path="/match/matching" element={<MatchRouter />} />
           </Route>
 
           {/* Catch-all route */}

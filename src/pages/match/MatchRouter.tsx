@@ -10,6 +10,7 @@ import MatchApproval from './MatchApproval';
 import MatchContact from './MatchContact';
 import MatchResultFailed from './MatchResultFailed';
 import MatchContactFailed from './MatchContactFailed';
+import MatchExpired from './MatchExpired';
 
 const MatchRouter = () => {
   const { matchStatus, setMatchStatus, setLoading, isLoading } = useMatchStore();
@@ -94,6 +95,8 @@ const MatchRouter = () => {
       return <MatchResultFailed onRefresh={fetchStatus} />;
     case MatchStatus.PARTNER_REMATCHED:
       return <MatchContactFailed onRefresh={fetchStatus} />;
+    case MatchStatus.EXPIRED:
+      return <MatchExpired onRefresh={fetchStatus} />;
     default:
       return <MatchHome onRefresh={fetchStatus} />;
   }

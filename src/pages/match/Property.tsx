@@ -9,6 +9,7 @@ import { getProperty, submitProperty } from '@/api/match';
 import { propertyQuestions } from '@/data/surveyQuestions';
 import { PropertyRequest } from '@/types/match';
 import { useToast } from '@/hooks/use-toast';
+import { getErrorMessage } from '@/lib/api';
 
 const Property = () => {
   const navigate = useNavigate();
@@ -54,13 +55,13 @@ const Property = () => {
     try {
       const res = await submitProperty(propertyData as PropertyRequest);
       if (res.success) {
-        toast({ title: 'Property 저장 완료', description: '설문 작성으로 이동합니다.' });
+        toast({ title: '기본 조건 저장 완료', description: '설문 작성으로 이동합니다.' });
         navigate('/match/profile/survey');
       } else {
-        toast({ title: '저장 실패', description: res.error || '다시 시도해주세요.', variant: 'destructive' });
+        toast({ title: '저장 실패', description: res.message || '다시 시도해주세요.', variant: 'destructive' });
       }
-    } catch {
-      toast({ title: '오류 발생', description: '서버 연결을 확인해주세요.', variant: 'destructive' });
+    } catch (err) {
+      toast({ title: '오류 발생', description: getErrorMessage(err), variant: 'destructive' });
     } finally {
       setIsSubmitting(false);
     }
@@ -84,13 +85,6 @@ const Property = () => {
           </div>
 
           {/* Info Banner */}
-          <div className="bg-primary/10 border border-primary/20 rounded-md p-4 flex items-start gap-3 mb-6">
-            <Info className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-foreground">
-              이 정보는 룸메이트 매칭 시 필수로 충족되어야 하는 조건입니다.
-            </p>
-          </div>
-
           <div className="grid gap-6">
             {propertyQuestions.map((item) => (
               <div key={item.id} className="space-y-3">

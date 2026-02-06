@@ -89,6 +89,7 @@ export interface ProfileStatusResponse {
   success: boolean;
   profile_status: ProfileStatus;
   user_id?: string;
+  match_status?: number;
   property?: ProfileProperty;
   survey?: ProfileSurvey;
 }
@@ -131,6 +132,7 @@ export enum MatchStatus {
   BOTH_APPROVED = 4,
   PARTNER_REJECTED = 5,
   PARTNER_REMATCHED = 6,
+  EXPIRED = 9,
 }
 
 export interface MatchStatusResponse {

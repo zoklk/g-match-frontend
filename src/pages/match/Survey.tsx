@@ -14,7 +14,7 @@ const Survey = () => {
   const { surveyAnswers, setSurveyAnswer, setSurveyAnswers } = useProfileStore();
   const [isLoading, setIsLoading] = useState(true);
 
-  // 진입 시 profile 상태 확인 및 기존 survey 불러오기
+  // 진입 시 기존 survey 불러오기
   useEffect(() => {
     const loadExisting = async () => {
       try {
@@ -50,6 +50,20 @@ const Survey = () => {
     }
   };
 
+  const scrollToCategory = (categoryId: string) => {
+    const element = document.getElementById(`category-${categoryId}`);
+    if (element) {
+      const offset = 120; // sticky header height
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-surface flex items-center justify-center">
@@ -59,16 +73,22 @@ const Survey = () => {
   }
 
   return (
-    <div className="min-h-screen bg-surface py-8 px-4">
+    <div className="min-h-screen bg-surface">
       <div className="max-w-2xl mx-auto">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-foreground mb-2">생활 패턴</h2>
-            <p className="text-muted-foreground">각 질문에 대해 본인의 성향을 선택해주세요</p>
-          </div>
+        {/* Title Section - Not sticky */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center py-8 px-4"
+        >
+          <h2 className="text-2xl font-bold text-foreground mb-2">생활 패턴</h2>
+          <p className="text-muted-foreground">각 질문에 대해 본인의 성향을 선택해주세요</p>
+        </motion.div>
 
-          {/* Progress */}
-          <div className="sticky top-0 bg-surface/95 backdrop-blur-sm py-3 -mx-4 px-4 z-20 mb-6">
+        {/* Progress and Category badges - Sticky header */}
+        <div className="sticky top-0 bg-surface/95 backdrop-blur-sm py-4 px-4 z-20 mb-6 border-b border-border/50">
+          {/* Progress bar */}
+          <div className="mb-4">
             <div className="flex justify-between text-sm text-muted-foreground mb-2">
               <span>진행률</span>
               <span>{progress}%</span>
@@ -84,31 +104,30 @@ const Survey = () => {
           </div>
 
           {/* Category progress badges */}
-          <div className="sticky top-0 bg-surface/95 backdrop-blur-sm py-3 -mx-4 px-4 z-10">
-            <div className="flex gap-2 justify-center flex-wrap">
-              {surveyCategories.map((category) => {
-                const catQuestions = surveyQuestions.filter((q) => q.category === category.id);
-                const catAnswered = catQuestions.filter((q) => (surveyAnswers && surveyAnswers[q.id]) !== undefined).length;
-                const isComplete = catAnswered === catQuestions.length;
+          <div className="flex gap-2 justify-center flex-wrap">
+            {surveyCategories.map((category) => {
+              const catQuestions = surveyQuestions.filter((q) => q.category === category.id);
+              const catAnswered = catQuestions.filter((q) => (surveyAnswers && surveyAnswers[q.id]) !== undefined).length;
+              const isComplete = catAnswered === catQuestions.length;
 
-                return (
-                  <Badge
-                    key={category.id}
-                    variant={isComplete ? 'default' : 'outline'}
-                    className={cn('transition-all', isComplete && 'bg-primary')}
-                  >
-                    {category.name} ({catAnswered}/{catQuestions.length})
-                  </Badge>
-                );
-              })}
-            </div>
+              return (
+                <Badge
+                  key={category.id}
+                  variant={isComplete ? 'default' : 'outline'}
+                  className={cn('transition-all cursor-pointer hover:scale-105', isComplete && 'bg-primary')}
+                  onClick={() => scrollToCategory(category.id)}
+                >
+                  {category.name} ({catAnswered}/{catQuestions.length})
+                </Badge>
+              );
+            })}
           </div>
+        </div>
 
-
-          {/* Questions by category */}
-          <div className="space-y-8 mt-4">
+        {/* Questions by category */}
+        <div className="space-y-8 px-4">
             {questionsByCategory.map((category) => (
-              <div key={category.id} className="space-y-4">
+              <div key={category.id} id={`category-${category.id}`} className="space-y-4 scroll-mt-32">
                 <div className="pb-2 border-b border-border">
                   <h3 className="text-lg font-semibold text-foreground">{category.name}</h3>
                 </div>
@@ -171,8 +190,9 @@ const Survey = () => {
             ))}
           </div>
 
-          {/* Navigation */}
-          <div className="flex justify-between mt-8 pt-6 border-t border-border sticky bottom-0 bg-surface py-4">
+        {/* Navigation - Sticky at bottom */}
+        <div className="sticky bottom-0 bg-surface/95 backdrop-blur-sm border-t border-border/50 py-4 px-4 mt-8">
+          <div className="flex justify-between">
             <Button variant="ghost" onClick={() => navigate('/match/profile/property')}>
               <ArrowLeft className="w-4 h-4 mr-2" />
               이전
@@ -182,7 +202,7 @@ const Survey = () => {
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

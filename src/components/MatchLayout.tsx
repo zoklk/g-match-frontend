@@ -1,5 +1,5 @@
 import { useLocation, useNavigate, Outlet } from 'react-router-dom';
-import { User, Heart, LogOut, Menu } from 'lucide-react';
+import { User, Heart, LogOut, Menu, UserCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/authStore';
 import { api } from '@/lib/api';
@@ -11,7 +11,13 @@ import { useState } from 'react';
 
 const navItems = [
   {
-    label: '내 프로필',
+    label: '마이 페이지',
+    icon: UserCircle,
+    path: '/account/mypage',
+    matchPaths: ['/account/mypage'],
+  },
+  {
+    label: '매칭 프로필',
     icon: User,
     path: '/match/profile',
     matchPaths: ['/match/profile'],
@@ -19,9 +25,8 @@ const navItems = [
   {
     label: '매칭',
     icon: Heart,
-    path: '/match',
-    matchPaths: ['/match'],
-    exact: true,
+    path: '/match/matching',
+    matchPaths: ['/match/matching'],
   },
 ];
 
@@ -133,7 +138,7 @@ const MatchLayout = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1">
         <Outlet />
       </main>
     </div>

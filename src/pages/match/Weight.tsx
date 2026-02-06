@@ -8,6 +8,7 @@ import { useProfileStore } from '@/store/profileStore';
 import { getSurvey, submitSurvey } from '@/api/match';
 import { surveyQuestions, surveyCategories, SURVEY_REQUIRED_KEYS } from '@/data/surveyQuestions';
 import { useToast } from '@/hooks/use-toast';
+import { getErrorMessage } from '@/lib/api';
 
 const WEIGHT_OPTIONS = [
   { value: 0.5, label: '0.5x' },
@@ -85,10 +86,10 @@ const Weight = () => {
         toast({ title: '설문 저장 완료', description: '프로필이 생성되었습니다.' });
         navigate('/match/profile');
       } else {
-        toast({ title: '저장 실패', description: res.error || '다시 시도해주세요.', variant: 'destructive' });
+        toast({ title: '저장 실패', description: res.message || '다시 시도해주세요.', variant: 'destructive' });
       }
-    } catch {
-      toast({ title: '오류 발생', description: '서버 연결을 확인해주세요.', variant: 'destructive' });
+    } catch (err) {
+      toast({ title: '오류 발생', description: getErrorMessage(err), variant: 'destructive' });
     } finally {
       setIsSubmitting(false);
     }
