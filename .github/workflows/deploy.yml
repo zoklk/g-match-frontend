@@ -6,7 +6,7 @@
 #
 # ▸ 빌드 시 주입되는 환경변수 (VITE_* → 번들에 인라인):
 #   - VITE_API_URL:       Prod B/E API 주소
-#   - VITE_CSRF_ENABLED:  CSRF 토큰 전송 활성화 (true)
+#   - VITE_CSRF_ENABLED:  CSRF 토큰 전송 활성화 (false)
 #
 # ▸ 필요한 GitHub Repository Secrets:
 #   - AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
@@ -44,7 +44,7 @@ jobs:
         env:
           NODE_ENV: production
           VITE_API_URL: https://api.g-match.org/api/v1alpha1
-          VITE_CSRF_ENABLED: 'true'
+          VITE_CSRF_ENABLED: 'false'
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
