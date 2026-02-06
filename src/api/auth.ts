@@ -9,6 +9,12 @@ import {
   GetUserInfoResponse,
   UpdateUserInfoRequest,
   UpdateUserInfoResponse,
+  WithdrawInfoResponse,
+  WithdrawRequest,
+  WithdrawResponse,
+  RecoveryInfoResponse,
+  RecoveryRequest,
+  RecoveryResponse,
 } from '@/types/auth';
 
 // ============================================
@@ -136,5 +142,57 @@ export const getUserInfo = async (): Promise<GetUserInfoResponse> => {
  */
 export const updateUserInfo = async (data: UpdateUserInfoRequest): Promise<UpdateUserInfoResponse> => {
   const response = await api.put<UpdateUserInfoResponse>('/account/info', data);
+  return response.data;
+};
+
+// ============================================
+// 회원탈퇴
+// ============================================
+
+/**
+ * 회원탈퇴 정보 조회
+ */
+export const getWithdrawInfo = async (): Promise<WithdrawInfoResponse> => {
+  const response = await api.get<WithdrawInfoResponse>('/account/auth/withdraw');
+  return response.data;
+};
+
+/**
+ * 회원탈퇴 요청
+ */
+export const withdraw = async (data: WithdrawRequest): Promise<WithdrawResponse> => {
+  const response = await api.post<WithdrawResponse>('/account/auth/withdraw', data);
+  return response.data;
+};
+
+// ============================================
+// 계정 복구
+// ============================================
+
+/**
+ * 계정 복구 정보 조회
+ * @param recoveryToken - OIDC callback에서 받은 서명된 복구 토큰
+ */
+export const getRecoveryInfo = async (recoveryToken?: string): Promise<RecoveryInfoResponse> => {
+  const config = recoveryToken
+    ? { headers: { 'X-Recovery-Token': recoveryToken } }
+    : {};
+  const response = await api.get<RecoveryInfoResponse>('/account/auth/recovery', config);
+  return response.data;
+};
+
+/**
+ * 계정 복구 요청
+ * @param data - 복구 동의 여부
+ * @param recoveryToken - OIDC callback에서 받은 서명된 복구 토큰
+ */
+export const recoverAccount = async (
+  data: RecoveryRequest,
+  recoveryToken?: string
+): Promise<RecoveryResponse> => {
+  const config = recoveryToken
+    ? { headers: { 'X-Recovery-Token': recoveryToken } }
+    : {};
+  const response = await api.post<RecoveryResponse>('/account/auth/recovery', data, config);
   return response.data;
 };

@@ -22,9 +22,25 @@ const AuthCallback = () => {
     const isNewUser = searchParams.get('is_new_user') === 'true';
     const registrationToken = searchParams.get('registration_token');
     const errorMsg = searchParams.get('error');
+    const needsRecovery = searchParams.get('needs_recovery') === 'true';
+    const redirectAfter = searchParams.get('redirect_after');
 
     if (errorMsg) {
       setError(decodeURIComponent(errorMsg));
+      return;
+    }
+
+    // 비활성화된 계정 → 복구 페이지로 이동
+    if (needsRecovery) {
+      const recoveryToken = searchParams.get('recovery_token');
+      const params = new URLSearchParams();
+      if (recoveryToken) {
+        params.set('recovery_token', recoveryToken);
+      }
+      if (redirectAfter) {
+        params.set('redirect_after', redirectAfter);
+      }
+      navigate(`/account/recovery${params.toString() ? `?${params}` : ''}`, { replace: true });
       return;
     }
 

@@ -44,6 +44,9 @@ export interface OIDCCallbackParams {
   is_new_user?: string;
   registration_token?: string;
   error?: string;
+  needs_recovery?: string;
+  user_email?: string;
+  recovery_token?: string;
 }
 
 // ============================================
@@ -123,6 +126,58 @@ export interface UpdateUserInfoResponse {
 export interface LogoutResponse {
   success: true;
   message: string;
+}
+
+// ============================================
+// 회원탈퇴
+// ============================================
+
+export interface WithdrawInfoResponse {
+  success: true;
+  message: string;
+  warning: string;
+  deleted_data: string[];
+  retention_period: string;
+  recovery_info: string;
+  confirmation_required: string;
+}
+
+export interface WithdrawRequest {
+  confirmation: string;
+}
+
+export interface WithdrawResponse {
+  success: true;
+  message: string;
+  recovery_info: string;
+}
+
+// ============================================
+// 계정 복구
+// ============================================
+
+export interface RecoveryInfoResponse {
+  success: true;
+  message: string;
+  user_email: string;
+  user_name: string;
+  deactivated_at: string | null;
+  remaining_days: number;
+  recovery_info: string;
+}
+
+export interface RecoveryRequest {
+  confirm_recovery: boolean;
+}
+
+export interface RecoveryResponse {
+  success: true;
+  message: string;
+  user: {
+    user_id: string;
+    email: string;
+    name: string;
+  };
 }
 
 // ============================================

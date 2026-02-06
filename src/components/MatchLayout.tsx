@@ -13,8 +13,8 @@ const navItems = [
   {
     label: '마이 페이지',
     icon: UserCircle,
-    path: '/match/mypage',
-    matchPaths: ['/match/mypage'],
+    path: '/account/mypage',
+    matchPaths: ['/account/mypage'],
   },
   {
     label: '매칭 프로필',

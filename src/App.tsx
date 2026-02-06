@@ -21,8 +21,9 @@ import Profile from "./pages/match/Profile";
 // Match - Matching flow
 import MatchRouter from "./pages/match/MatchRouter";
 
-// Match - MyPage
-import MyPage from "./pages/match/MyPage";
+// Account - MyPage
+import MyPage from "./pages/account/MyPage";
+import AccountRecovery from "./pages/account/AccountRecovery";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ const App = () => (
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/register/agree" element={<RegisterAgree />} />
           <Route path="/register/basic-info" element={<RegisterBasicInfo />} />
+          <Route path="/account/recovery" element={<AccountRecovery />} />
 
           {/* Protected Routes with Sidebar Layout */}
           <Route
@@ -48,8 +50,8 @@ const App = () => (
               </ProtectedRoute>
             }
           >
-            {/* MyPage */}
-            <Route path="/match/mypage" element={<MyPage />} />
+            {/* MyPage (Account) */}
+            <Route path="/account/mypage" element={<MyPage />} />
 
             {/* Profile flow */}
             <Route path="/match/profile" element={<Profile />} />
