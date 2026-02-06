@@ -131,6 +131,7 @@ export enum MatchStatus {
   BOTH_APPROVED = 4,
   PARTNER_REJECTED = 5,
   PARTNER_REMATCHED = 6,
+  EXPIRED = 9,
 }
 
 export interface MatchStatusResponse {
