@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, Edit, User, Loader2 } from 'lucide-react';
+import { ArrowRight, Edit, User, Loader2, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getProfileStatus } from '@/api/match';
 import { ProfileProperty, ProfileSurvey } from '@/types/match';
@@ -14,8 +14,11 @@ const Profile = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [profileStatus, setProfileStatus] = useState<number>(0);
+  const [matchStatus, setMatchStatus] = useState<number>(0);
   const [property, setProperty] = useState<ProfileProperty | null>(null);
   const [survey, setSurvey] = useState<ProfileSurvey | null>(null);
+
+  const isMatchingInProgress = matchStatus !== 0;
 
   useEffect(() => {
     const load = async () => {
@@ -23,6 +26,7 @@ const Profile = () => {
         const res = await getProfileStatus();
         if (res.success) {
           setProfileStatus(res.profile_status);
+          if (res.match_status !== undefined) setMatchStatus(res.match_status);
           if (res.property) setProperty(res.property);
           if (res.survey) setSurvey(res.survey);
         }
@@ -267,10 +271,15 @@ const Profile = () => {
             <Button
               variant="outline"
               className="w-full"
+              disabled={isMatchingInProgress}
               onClick={() => navigate('/match/profile/property')}
             >
-              <Edit className="w-4 h-4 mr-2" />
-              프로필 수정하기
+              {isMatchingInProgress ? (
+                <Lock className="w-4 h-4 mr-2" />
+              ) : (
+                <Edit className="w-4 h-4 mr-2" />
+              )}
+              {isMatchingInProgress ? '매칭 진행 중에는 수정할 수 없습니다' : '프로필 수정하기'}
             </Button>
             <Button className="w-full" onClick={() => navigate('/match/matching')}>
               <ArrowRight className="w-4 h-4 mr-2" />

@@ -89,6 +89,7 @@ export interface ProfileStatusResponse {
   success: boolean;
   profile_status: ProfileStatus;
   user_id?: string;
+  match_status?: number;
   property?: ProfileProperty;
   survey?: ProfileSurvey;
 }
