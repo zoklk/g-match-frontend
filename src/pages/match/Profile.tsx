@@ -272,7 +272,7 @@ const Profile = () => {
               <Edit className="w-4 h-4 mr-2" />
               프로필 수정하기
             </Button>
-            <Button className="w-full" onClick={() => navigate('/match')}>
+            <Button className="w-full" onClick={() => navigate('/match/matching')}>
               <ArrowRight className="w-4 h-4 mr-2" />
               매칭하러 가기
             </Button>

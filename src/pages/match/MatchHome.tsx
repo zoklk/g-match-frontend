@@ -6,6 +6,7 @@ import { Play, User } from 'lucide-react';
 import { startMatching } from '@/api/match';
 import { useMatchStore } from '@/store/matchStore';
 import { useToast } from '@/hooks/use-toast';
+import { getErrorMessage } from '@/lib/api';
 
 interface MatchHomeProps {
   onRefresh: () => Promise<void>;
@@ -31,10 +32,10 @@ const MatchHome = ({ onRefresh }: MatchHomeProps) => {
           variant: 'destructive',
         });
       }
-    } catch {
+    } catch (err) {
       toast({
-        title: '오류 발생',
-        description: '서버와 연결할 수 없습니다.',
+        title: '매칭 시작 실패',
+        description: getErrorMessage(err),
         variant: 'destructive',
       });
     } finally {

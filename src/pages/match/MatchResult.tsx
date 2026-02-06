@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { getMatchResult, agreeMatch, rejectMatch } from '@/api/match';
 import { useMatchStore } from '@/store/matchStore';
 import { useToast } from '@/hooks/use-toast';
+import { getErrorMessage } from '@/lib/api';
 import { ProfileProperty, ProfileSurvey } from '@/types/match';
 import { surveyCategories } from '@/data/surveyQuestions';
 import { ProfileSlider } from '@/components/ProfileSlider';
@@ -59,10 +60,10 @@ const MatchResult = ({ onRefresh }: MatchResultProps) => {
           setPartnerSurvey(res.partner.survey);
           setCompatibilityScore(res.compatibility_score);
         }
-      } catch {
+      } catch (err) {
         toast({
           title: '결과 로딩 실패',
-          description: '매칭 결과를 불러올 수 없습니다.',
+          description: getErrorMessage(err, '매칭 결과를 불러올 수 없습니다.'),
           variant: 'destructive',
         });
       } finally {
@@ -88,8 +89,8 @@ const MatchResult = ({ onRefresh }: MatchResultProps) => {
           variant: 'destructive',
         });
       }
-    } catch {
-      toast({ title: '오류 발생', description: '서버와 연결할 수 없습니다.', variant: 'destructive' });
+    } catch (err) {
+      toast({ title: '오류 발생', description: getErrorMessage(err), variant: 'destructive' });
     } finally {
       setIsActing(false);
       setLoading(false);
@@ -111,8 +112,8 @@ const MatchResult = ({ onRefresh }: MatchResultProps) => {
           variant: 'destructive',
         });
       }
-    } catch {
-      toast({ title: '오류 발생', description: '서버와 연결할 수 없습니다.', variant: 'destructive' });
+    } catch (err) {
+      toast({ title: '오류 발생', description: getErrorMessage(err), variant: 'destructive' });
     } finally {
       setIsActing(false);
       setLoading(false);

@@ -19,9 +19,8 @@ const navItems = [
   {
     label: '매칭',
     icon: Heart,
-    path: '/match',
-    matchPaths: ['/match'],
-    exact: true,
+    path: '/match/matching',
+    matchPaths: ['/match/matching'],
   },
 ];
 

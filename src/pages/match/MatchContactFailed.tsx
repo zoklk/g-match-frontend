@@ -5,6 +5,7 @@ import { User, Loader2, RotateCcw, UserX } from 'lucide-react';
 import { getContact, rematch as rematchApi } from '@/api/match';
 import { useMatchStore } from '@/store/matchStore';
 import { useToast } from '@/hooks/use-toast';
+import { getErrorMessage } from '@/lib/api';
 
 interface MatchContactFailedProps {
   onRefresh: () => Promise<void>;
@@ -57,8 +58,8 @@ const MatchContactFailed = ({ onRefresh }: MatchContactFailedProps) => {
           variant: 'destructive',
         });
       }
-    } catch {
-      toast({ title: '오류 발생', description: '서버와 연결할 수 없습니다.', variant: 'destructive' });
+    } catch (err) {
+      toast({ title: '오류 발생', description: getErrorMessage(err), variant: 'destructive' });
     } finally {
       setIsRematching(false);
       setLoading(false);

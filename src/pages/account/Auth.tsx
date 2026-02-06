@@ -127,28 +127,6 @@ const Auth = () => {
               </p>
             </div>
 
-            {/* Features */}
-            <div className="pt-8 border-t border-border">
-              <h3 className="text-sm font-medium text-muted-foreground mb-4">
-                G-Match 특징
-              </h3>
-              <div className="grid grid-cols-2 gap-4">
-                {[
-                  { icon: '🎯', text: '정밀 매칭' },
-                  { icon: '🔒', text: '안전한 인증' },
-                  { icon: '⚡', text: '빠른 설문' },
-                  { icon: '🤝', text: '상호 동의' },
-                ].map((feature, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-2 text-sm text-muted-foreground"
-                  >
-                    <span>{feature.icon}</span>
-                    <span>{feature.text}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
           </motion.div>
         </div>
       </div>

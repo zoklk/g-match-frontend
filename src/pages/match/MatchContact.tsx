@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { getContact, rematch as rematchApi } from '@/api/match';
 import { useMatchStore } from '@/store/matchStore';
 import { useToast } from '@/hooks/use-toast';
+import { getErrorMessage } from '@/lib/api';
 import {
   Radar,
   RadarChart,
@@ -79,8 +80,8 @@ const MatchContact = ({ onRefresh }: MatchContactProps) => {
           variant: 'destructive',
         });
       }
-    } catch {
-      toast({ title: '오류 발생', description: '서버와 연결할 수 없습니다.', variant: 'destructive' });
+    } catch (err) {
+      toast({ title: '오류 발생', description: getErrorMessage(err), variant: 'destructive' });
     } finally {
       setIsRematching(false);
       setLoading(false);

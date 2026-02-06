@@ -52,7 +52,7 @@ const App = () => (
             <Route path="/match/profile/weight" element={<Weight />} />
 
             {/* Matching flow */}
-            <Route path="/match" element={<MatchRouter />} />
+            <Route path="/match/matching" element={<MatchRouter />} />
           </Route>
 
           {/* Catch-all route */}

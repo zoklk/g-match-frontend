@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { getMatchResult, cancelMatching } from '@/api/match';
 import { useMatchStore } from '@/store/matchStore';
 import { useToast } from '@/hooks/use-toast';
+import { getErrorMessage } from '@/lib/api';
 import { ProfileProperty, ProfileSurvey } from '@/types/match';
 import { surveyCategories } from '@/data/surveyQuestions';
 import { ProfileSlider } from '@/components/ProfileSlider';
@@ -89,8 +90,8 @@ const MatchApproval = ({ onRefresh }: MatchApprovalProps) => {
           variant: 'destructive',
         });
       }
-    } catch {
-      toast({ title: '오류 발생', description: '서버와 연결할 수 없습니다.', variant: 'destructive' });
+    } catch (err) {
+      toast({ title: '오류 발생', description: getErrorMessage(err), variant: 'destructive' });
     } finally {
       setIsCancelling(false);
       setLoading(false);

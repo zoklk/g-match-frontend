@@ -9,6 +9,7 @@ import { getProperty, submitProperty } from '@/api/match';
 import { propertyQuestions } from '@/data/surveyQuestions';
 import { PropertyRequest } from '@/types/match';
 import { useToast } from '@/hooks/use-toast';
+import { getErrorMessage } from '@/lib/api';
 
 const Property = () => {
   const navigate = useNavigate();
@@ -54,13 +55,13 @@ const Property = () => {
     try {
       const res = await submitProperty(propertyData as PropertyRequest);
       if (res.success) {
-        toast({ title: 'Property 저장 완료', description: '설문 작성으로 이동합니다.' });
+        toast({ title: '기본 조건 저장 완료', description: '설문 작성으로 이동합니다.' });
         navigate('/match/profile/survey');
       } else {
-        toast({ title: '저장 실패', description: res.error || '다시 시도해주세요.', variant: 'destructive' });
+        toast({ title: '저장 실패', description: res.message || '다시 시도해주세요.', variant: 'destructive' });
       }
-    } catch {
-      toast({ title: '오류 발생', description: '서버 연결을 확인해주세요.', variant: 'destructive' });
+    } catch (err) {
+      toast({ title: '오류 발생', description: getErrorMessage(err), variant: 'destructive' });
     } finally {
       setIsSubmitting(false);
     }
