@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Loader2, User, Mail, Phone, GraduationCap, UserCircle, AlertTriangle } from 'lucide-react';
-import { getUserInfo, withdraw } from '@/api/auth';
+import { Loader2, User, Mail, Phone, GraduationCap, UserCircle, AlertTriangle, Home } from 'lucide-react';
+import { getUserInfo, withdraw, updateUserInfo } from '@/api/auth';
 import { UserResponse } from '@/types/auth';
 import { getErrorMessage } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Dialog,
   DialogContent,
@@ -31,6 +32,12 @@ const MyPage = () => {
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   const [withdrawConfirmation, setWithdrawConfirmation] = useState('');
   const [isWithdrawing, setIsWithdrawing] = useState(false);
+
+  // 프로필 수정 모달 상태
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editNickname, setEditNickname] = useState('');
+  const [editHouse, setEditHouse] = useState('');
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -91,6 +98,61 @@ const MyPage = () => {
     setWithdrawConfirmation('');
   };
 
+  // 프로필 수정 모달 열기
+  const handleOpenEditModal = () => {
+    if (userInfo) {
+      setEditNickname(userInfo.nickname || '');
+      setEditHouse(userInfo.house || '');
+    }
+    setIsEditModalOpen(true);
+  };
+
+  // 프로필 수정 모달 닫기
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditNickname('');
+    setEditHouse('');
+  };
+
+  // 닉네임 유효성 검사
+  const isNicknameValid = editNickname.trim().length >= 2 && editNickname.trim().length <= 20;
+
+  // 프로필 수정 저장
+  const handleSaveProfile = async () => {
+    if (!isNicknameValid) {
+      toast({
+        title: '닉네임 오류',
+        description: '닉네임은 2~20자 사이로 입력해주세요.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      const res = await updateUserInfo({
+        nickname: editNickname.trim(),
+        house: editHouse.trim() || undefined,
+      });
+
+      if (res.success) {
+        setUserInfo(res.user);
+        toast({
+          title: '프로필이 수정되었습니다',
+        });
+        handleCloseEditModal();
+      }
+    } catch (err) {
+      toast({
+        title: '프로필 수정 실패',
+        description: getErrorMessage(err),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-surface flex items-center justify-center">
@@ -108,12 +170,13 @@ const MyPage = () => {
   }
 
   const infoItems = [
-    { label: '이름', value: userInfo.name, icon: User },
-    { label: '닉네임', value: userInfo.nickname || '-', icon: UserCircle },
-    { label: '성별', value: getGenderLabel(userInfo.gender), icon: User },
-    { label: '학번', value: userInfo.student_id || '-', icon: GraduationCap },
-    { label: '이메일', value: userInfo.email, icon: Mail },
-    { label: '전화번호', value: userInfo.phone_number || '-', icon: Phone },
+    { label: '이름', value: userInfo.name, icon: User, editable: false },
+    { label: '닉네임', value: userInfo.nickname || '-', icon: UserCircle, editable: true },
+    { label: '성별', value: getGenderLabel(userInfo.gender), icon: User, editable: false },
+    { label: '기숙사', value: userInfo.house || '-', icon: Home, editable: true },
+    { label: '학번', value: userInfo.student_id || '-', icon: GraduationCap, editable: false },
+    { label: '이메일', value: userInfo.email, icon: Mail, editable: false },
+    { label: '전화번호', value: userInfo.phone_number || '-', icon: Phone, editable: false },
   ];
 
   return (
@@ -132,12 +195,19 @@ const MyPage = () => {
               <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
                 <User className="w-10 h-10 text-primary" />
               </div>
-              <div>
+              <div className="flex-1">
                 <h3 className="text-xl font-bold text-foreground">{userInfo.name}</h3>
                 <p className="text-muted-foreground text-sm">
                   {userInfo.nickname ? `@${userInfo.nickname}` : ''}
                 </p>
               </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleOpenEditModal}
+              >
+                수정
+              </Button>
             </div>
 
             {/* Info List */}
@@ -233,6 +303,76 @@ const MyPage = () => {
               ) : (
                 '회원탈퇴'
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* 프로필 수정 모달 */}
+      <Dialog open={isEditModalOpen} onOpenChange={handleCloseEditModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>프로필 수정</DialogTitle>
+            <DialogDescription>
+              닉네임과 기숙사 정보를 수정할 수 있습니다.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {/* 닉네임 */}
+            <div className="space-y-2">
+              <Label htmlFor="edit-nickname">
+                닉네임 <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="edit-nickname"
+                placeholder="닉네임 (2~20자)"
+                value={editNickname}
+                onChange={(e) => setEditNickname(e.target.value)}
+                maxLength={20}
+              />
+              {editNickname && !isNicknameValid && (
+                <p className="text-xs text-destructive">
+                  닉네임은 2~20자 사이로 입력해주세요.
+                </p>
+              )}
+            </div>
+
+            {/* 기숙사 */}
+            <div className="space-y-2">
+              <Label htmlFor="edit-house">기숙사</Label>
+              <Input
+                id="edit-house"
+                placeholder="기숙사 (선택)"
+                value={editHouse}
+                onChange={(e) => setEditHouse(e.target.value)}
+                maxLength={50}
+              />
+            </div>
+
+            {/* 안내 메시지 */}
+            <div className="bg-muted/50 rounded-md p-3 text-xs text-muted-foreground">
+              <p>
+                이름, 학번, 이메일, 전화번호는 GIST 계정에서 관리됩니다.
+                성별은 회원가입 시 설정되며 변경할 수 없습니다.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              onClick={handleCloseEditModal}
+              disabled={isUpdating}
+              className="w-full sm:w-auto"
+            >
+              취소
+            </Button>
+            <Button
+              onClick={handleSaveProfile}
+              disabled={!isNicknameValid || isUpdating}
+              className="w-full sm:w-auto"
+            >
+              {isUpdating ? '저장 중...' : '저장'}
             </Button>
           </DialogFooter>
         </DialogContent>
