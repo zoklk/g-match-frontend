@@ -46,13 +46,20 @@ const MatchRouter = () => {
       }
     };
 
-    if (matchStatus === MatchStatus.IN_QUEUE) {
+    const pollingStatuses = [
+      MatchStatus.IN_QUEUE,
+      MatchStatus.MATCHED,
+      MatchStatus.MY_APPROVED,
+      MatchStatus.BOTH_APPROVED,
+    ];
+
+    if (pollingStatuses.includes(matchStatus as MatchStatus)) {
       pollingIntervalRef.current = setInterval(async () => {
         try {
           const res = await getMatchStatus();
           if (res.success) {
             setMatchStatus(res.match_status);
-            if (res.match_status !== MatchStatus.IN_QUEUE) {
+            if (!pollingStatuses.includes(res.match_status)) {
               clearPolling();
             }
           }
