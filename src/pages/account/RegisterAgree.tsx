@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
 import { getTerms, agreeTerms } from '@/api/auth';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
@@ -8,15 +9,16 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ArrowLeft, Loader2, FileText, Shield, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { getErrorMessage } from '@/lib/api';
 
 interface TermsData {
   terms_of_service: {
     title: string;
-    content: string;
+    url: string;
   };
   privacy_policy: {
     title: string;
-    content: string;
+    url: string;
   };
 }
 
@@ -27,6 +29,8 @@ const RegisterAgree = () => {
   const { registrationToken, setRegistrationToken, clearRegistrationToken } = useAuthStore();
 
   const [terms, setTerms] = useState<TermsData | null>(null);
+  const [termsContent, setTermsContent] = useState<string>('');
+  const [privacyContent, setPrivacyContent] = useState<string>('');
   const [agreed, setAgreed] = useState({
     termsOfService: false,
     privacyPolicy: false,
@@ -45,7 +49,7 @@ const RegisterAgree = () => {
       return;
     }
 
-    // 약관 내용 조회
+    // 약관 URL 조회
     fetchTerms();
   }, [token, navigate]);
 
@@ -54,6 +58,15 @@ const RegisterAgree = () => {
     try {
       const data = await getTerms();
       setTerms(data);
+
+      // Markdown 파일 다운로드
+      const [termsRes, privacyRes] = await Promise.all([
+        data.terms_of_service.url ? fetch(data.terms_of_service.url).then(r => r.text()) : Promise.resolve(''),
+        data.privacy_policy.url ? fetch(data.privacy_policy.url).then(r => r.text()) : Promise.resolve(''),
+      ]);
+
+      setTermsContent(termsRes || '약관 내용을 불러올 수 없습니다.');
+      setPrivacyContent(privacyRes || '개인정보 처리방침을 불러올 수 없습니다.');
     } catch (err) {
       console.error('Failed to fetch terms:', err);
       setError('약관을 불러오는데 실패했습니다.');
@@ -103,7 +116,7 @@ const RegisterAgree = () => {
         // 세션 만료 → 다시 로그인
         toast({
           title: '세션 만료',
-          description: '세션이 만료되었습니다. 다시 로그인해주세요.',
+          description: getErrorMessage(err, '세션이 만료되었습니다. 다시 로그인해주세요.'),
           variant: 'destructive',
         });
         clearRegistrationToken();
@@ -111,7 +124,7 @@ const RegisterAgree = () => {
       } else {
         toast({
           title: '오류',
-          description: err.response?.data?.message || '약관 동의 처리 중 오류가 발생했습니다.',
+          description: getErrorMessage(err),
           variant: 'destructive',
         });
       }
@@ -225,8 +238,8 @@ const RegisterAgree = () => {
               </div>
             </div>
             <ScrollArea className="h-48 p-4">
-              <div className="text-sm text-muted-foreground whitespace-pre-wrap">
-                {terms?.terms_of_service.content || '약관 내용을 불러오는 중...'}
+              <div className="prose prose-sm prose-gray dark:prose-invert max-w-none">
+                <ReactMarkdown>{termsContent}</ReactMarkdown>
               </div>
             </ScrollArea>
           </div>
@@ -254,8 +267,8 @@ const RegisterAgree = () => {
               </div>
             </div>
             <ScrollArea className="h-48 p-4">
-              <div className="text-sm text-muted-foreground whitespace-pre-wrap">
-                {terms?.privacy_policy.content || '약관 내용을 불러오는 중...'}
+              <div className="prose prose-sm prose-gray dark:prose-invert max-w-none">
+                <ReactMarkdown>{privacyContent}</ReactMarkdown>
               </div>
             </ScrollArea>
           </div>

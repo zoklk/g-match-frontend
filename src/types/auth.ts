@@ -53,7 +53,7 @@ export interface OIDCCallbackParams {
 
 export interface TermsContent {
   title: string;
-  content: string;
+  url: string;  // S3 hosted markdown file URL
 }
 
 export interface GetTermsResponse {
