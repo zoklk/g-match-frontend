@@ -9,7 +9,6 @@ export interface User {
   studentId?: string;
   phoneNumber?: string;
   gender?: 'M' | 'F';
-  house?: string;
   nickname?: string;
   isOidcUser?: boolean;
   dateJoined?: string;
@@ -23,7 +22,6 @@ export interface UserResponse {
   student_id?: string;
   phone_number?: string;
   gender?: 'M' | 'F';
-  house?: string;
   nickname?: string;
   is_oidc_user?: boolean;
   date_joined?: string;
@@ -109,7 +107,6 @@ export interface GetUserInfoResponse {
 // 수정 가능한 필드만 (IdP 관리 필드 제외)
 // Note: gender는 회원가입 후 수정 불가
 export interface UpdateUserInfoRequest {
-  house?: string;
   nickname?: string;
 }
 
@@ -204,7 +201,6 @@ export function transformUserResponse(response: UserResponse): User {
     studentId: response.student_id,
     phoneNumber: response.phone_number,
     gender: response.gender,
-    house: response.house,
     nickname: response.nickname,
     isOidcUser: response.is_oidc_user,
     dateJoined: response.date_joined,
