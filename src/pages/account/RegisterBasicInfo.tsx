@@ -26,11 +26,22 @@ const RegisterBasicInfo = () => {
     }
   }, [registrationToken, navigate]);
 
+  const isNicknameValid = nickname.trim().length >= 2 && nickname.trim().length <= 20;
+
   const handleSubmit = async () => {
     if (!gender) {
       toast({
         title: '성별 선택 필요',
         description: '성별을 선택해주세요.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!nickname.trim() || nickname.trim().length < 2) {
+      toast({
+        title: '닉네임 입력 필요',
+        description: '닉네임은 2자 이상 입력해주세요.',
         variant: 'destructive',
       });
       return;
@@ -46,7 +57,7 @@ const RegisterBasicInfo = () => {
       const response = await submitBasicInfo(
         {
           gender,
-          nickname: nickname.trim() || undefined,
+          nickname: nickname.trim(),
         },
         registrationToken
       );
@@ -182,26 +193,35 @@ const RegisterBasicInfo = () => {
             )}
           </div>
 
-          {/* 닉네임 (선택) */}
+          {/* 닉네임 (필수) */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Smile className="w-4 h-4 text-primary" />
               <Label htmlFor="nickname" className="text-base font-semibold">
-                닉네임 <span className="text-muted-foreground text-sm">(선택)</span>
+                닉네임 <span className="text-destructive">*</span>
               </Label>
             </div>
             <Input
               id="nickname"
               type="text"
-              placeholder="사용할 닉네임을 입력하세요"
+              placeholder="사용할 닉네임을 입력하세요 (2~20자)"
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
               className="h-12"
               maxLength={20}
             />
-            <p className="text-sm text-muted-foreground">
-              나중에 프로필에서 변경할 수 있습니다
-            </p>
+            {!isNicknameValid && nickname.length > 0 && (
+              <p className="text-sm text-destructive flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" />
+                닉네임은 2자 이상 입력해주세요
+              </p>
+            )}
+            {!nickname && (
+              <p className="text-sm text-muted-foreground flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" />
+                닉네임은 필수 입력 항목입니다
+              </p>
+            )}
           </div>
 
           {/* 안내 메시지 */}
@@ -217,7 +237,7 @@ const RegisterBasicInfo = () => {
             onClick={handleSubmit}
             size="lg"
             className="w-full"
-            disabled={!gender || loading}
+            disabled={!gender || !isNicknameValid || loading}
           >
             {loading ? (
               <>

@@ -83,7 +83,7 @@ export interface AgreeTermsResponse {
 
 export interface BasicInfoRequest {
   gender: 'M' | 'F';  // 필수
-  nickname?: string;   // 선택
+  nickname: string;   // 필수 (2~20자)
 }
 
 export interface BasicInfoResponse {
