@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Loader2, User, Mail, Phone, GraduationCap, UserCircle, AlertTriangle, Home } from 'lucide-react';
+import { Loader2, User, Mail, Phone, GraduationCap, UserCircle, AlertTriangle } from 'lucide-react';
 import { getUserInfo, withdraw, updateUserInfo } from '@/api/auth';
 import { UserResponse } from '@/types/auth';
 import { getErrorMessage } from '@/lib/api';
@@ -36,7 +36,6 @@ const MyPage = () => {
   // 프로필 수정 모달 상태
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editNickname, setEditNickname] = useState('');
-  const [editHouse, setEditHouse] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
@@ -102,7 +101,6 @@ const MyPage = () => {
   const handleOpenEditModal = () => {
     if (userInfo) {
       setEditNickname(userInfo.nickname || '');
-      setEditHouse(userInfo.house || '');
     }
     setIsEditModalOpen(true);
   };
@@ -111,7 +109,6 @@ const MyPage = () => {
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false);
     setEditNickname('');
-    setEditHouse('');
   };
 
   // 닉네임 유효성 검사
@@ -132,7 +129,6 @@ const MyPage = () => {
     try {
       const res = await updateUserInfo({
         nickname: editNickname.trim(),
-        house: editHouse.trim() || undefined,
       });
 
       if (res.success) {
@@ -173,7 +169,6 @@ const MyPage = () => {
     { label: '이름', value: userInfo.name, icon: User, editable: false },
     { label: '닉네임', value: userInfo.nickname || '-', icon: UserCircle, editable: true },
     { label: '성별', value: getGenderLabel(userInfo.gender), icon: User, editable: false },
-    { label: '기숙사', value: userInfo.house || '-', icon: Home, editable: true },
     { label: '학번', value: userInfo.student_id || '-', icon: GraduationCap, editable: false },
     { label: '이메일', value: userInfo.email, icon: Mail, editable: false },
     { label: '전화번호', value: userInfo.phone_number || '-', icon: Phone, editable: false },
@@ -313,7 +308,7 @@ const MyPage = () => {
           <DialogHeader>
             <DialogTitle>프로필 수정</DialogTitle>
             <DialogDescription>
-              닉네임과 기숙사 정보를 수정할 수 있습니다.
+              닉네임을 수정할 수 있습니다.
             </DialogDescription>
           </DialogHeader>
 
@@ -337,17 +332,6 @@ const MyPage = () => {
               )}
             </div>
 
-            {/* 기숙사 */}
-            <div className="space-y-2">
-              <Label htmlFor="edit-house">기숙사</Label>
-              <Input
-                id="edit-house"
-                placeholder="기숙사 (선택)"
-                value={editHouse}
-                onChange={(e) => setEditHouse(e.target.value)}
-                maxLength={50}
-              />
-            </div>
 
             {/* 안내 메시지 */}
             <div className="bg-muted/50 rounded-md p-3 text-xs text-muted-foreground">

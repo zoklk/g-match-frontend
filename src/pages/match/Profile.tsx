@@ -162,14 +162,14 @@ const Profile = () => {
                 <h4 className="text-sm font-semibold text-foreground mb-4">기본 정보</h4>
                 <div className="space-y-3">
                   {/* 희망 거주기간 */}
-                  <div className="flex items-center gap-4">
-                    <span className="text-sm text-muted-foreground w-16">거주기간</span>
-                    <div className="flex gap-2">
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <span className="text-sm text-muted-foreground w-16 shrink-0">거주기간</span>
+                    <div className="flex gap-1 sm:gap-2 flex-wrap w-full">
                       {[1, 2, 3, 4].map((period) => (
                         <div
                           key={period}
                           className={cn(
-                            "px-3 py-2 rounded-md text-sm font-medium border-2 transition-colors",
+                            "px-2 sm:px-3 py-2 rounded-md text-xs sm:text-sm font-medium border-2 transition-colors flex-1 sm:flex-none min-w-0 text-center",
                             property.stay_period === period
                               ? "border-primary bg-primary text-primary-foreground"
                               : "border-border bg-background text-muted-foreground"

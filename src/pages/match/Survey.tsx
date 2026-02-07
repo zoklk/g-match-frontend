@@ -73,7 +73,7 @@ const Survey = () => {
   }
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen bg-surface overflow-x-hidden">
       <div className="max-w-2xl mx-auto">
         {/* Title Section - Not sticky */}
         <motion.div
@@ -84,46 +84,50 @@ const Survey = () => {
           <h2 className="text-2xl font-bold text-foreground mb-2">생활 패턴</h2>
           <p className="text-muted-foreground">각 질문에 대해 본인의 성향을 선택해주세요</p>
         </motion.div>
+      </div>
 
-        {/* Progress and Category badges - Sticky header */}
-        <div className="sticky top-0 bg-surface/95 backdrop-blur-sm py-4 px-4 z-20 mb-6 border-b border-border/50">
-          {/* Progress bar */}
-          <div className="mb-4">
-            <div className="flex justify-between text-sm text-muted-foreground mb-2">
-              <span>진행률</span>
-              <span>{progress}%</span>
-            </div>
-            <div className="h-2 bg-secondary rounded-full overflow-hidden">
-              <motion.div
-                className="h-full bg-primary"
-                initial={{ width: 0 }}
-                animate={{ width: `${progress}%` }}
-                transition={{ duration: 0.3 }}
-              />
-            </div>
+      {/* Progress and Category badges - Sticky header (max-w 바깥) */}
+      <div className="sticky top-0 z-50 bg-surface/95 backdrop-blur-md border-b border-border/50">
+        <div className="max-w-2xl mx-auto py-4 px-4">
+        {/* Progress bar */}
+        <div className="mb-3">
+          <div className="flex justify-between text-sm text-muted-foreground mb-2">
+            <span>진행률</span>
+            <span>{progress}%</span>
           </div>
-
-          {/* Category progress badges */}
-          <div className="flex gap-2 justify-center flex-wrap">
-            {surveyCategories.map((category) => {
-              const catQuestions = surveyQuestions.filter((q) => q.category === category.id);
-              const catAnswered = catQuestions.filter((q) => (surveyAnswers && surveyAnswers[q.id]) !== undefined).length;
-              const isComplete = catAnswered === catQuestions.length;
-
-              return (
-                <Badge
-                  key={category.id}
-                  variant={isComplete ? 'default' : 'outline'}
-                  className={cn('transition-all cursor-pointer hover:scale-105', isComplete && 'bg-primary')}
-                  onClick={() => scrollToCategory(category.id)}
-                >
-                  {category.name} ({catAnswered}/{catQuestions.length})
-                </Badge>
-              );
-            })}
+          <div className="h-2 bg-secondary rounded-full overflow-hidden">
+            <motion.div
+              className="h-full bg-primary"
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.3 }}
+            />
           </div>
         </div>
 
+        {/* Category progress badges */}
+        <div className="flex gap-1.5 sm:gap-2 justify-center flex-wrap">
+          {surveyCategories.map((category) => {
+            const catQuestions = surveyQuestions.filter((q) => q.category === category.id);
+            const catAnswered = catQuestions.filter((q) => (surveyAnswers && surveyAnswers[q.id]) !== undefined).length;
+            const isComplete = catAnswered === catQuestions.length;
+
+            return (
+              <Badge
+                key={category.id}
+                variant={isComplete ? 'default' : 'outline'}
+                className={cn('transition-all cursor-pointer hover:scale-105 text-xs px-2 py-1', isComplete && 'bg-primary')}
+                onClick={() => scrollToCategory(category.id)}
+              >
+                {category.name} ({catAnswered}/{catQuestions.length})
+              </Badge>
+            );
+          })}
+        </div>
+        </div>
+      </div>
+
+      <div className="max-w-2xl mx-auto">
         {/* Questions by category */}
         <div className="space-y-8 px-4">
             {questionsByCategory.map((category) => (
@@ -162,13 +166,13 @@ const Survey = () => {
                         </div>
 
                         {/* 1~5 선택 버튼 */}
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex gap-1 sm:gap-2">
                           {[1, 2, 3, 4, 5].map((val) => (
                             <button
                               key={val}
                               onClick={() => setSurveyAnswer(question.id, val)}
                               className={cn(
-                                'px-3 py-2 rounded-sm text-sm font-medium transition-all border-2 flex-1 min-w-[60px]',
+                                'py-2 rounded-sm text-sm font-medium transition-all border-2 flex-1 min-w-0',
                                 (surveyAnswers && surveyAnswers[question.id]) === val
                                   ? 'border-primary bg-primary text-primary-foreground'
                                   : 'border-border bg-background text-foreground hover:border-primary/50'
