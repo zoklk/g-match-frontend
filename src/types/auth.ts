@@ -107,8 +107,8 @@ export interface GetUserInfoResponse {
 }
 
 // 수정 가능한 필드만 (IdP 관리 필드 제외)
+// Note: gender는 회원가입 후 수정 불가
 export interface UpdateUserInfoRequest {
-  gender?: 'M' | 'F';
   house?: string;
   nickname?: string;
 }
