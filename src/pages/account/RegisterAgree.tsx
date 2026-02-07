@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { getTerms, agreeTerms } from '@/api/auth';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
@@ -239,7 +240,7 @@ const RegisterAgree = () => {
             </div>
             <ScrollArea className="h-48 p-4">
               <div className="prose prose-sm prose-gray dark:prose-invert max-w-none">
-                <ReactMarkdown>{termsContent}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{termsContent}</ReactMarkdown>
               </div>
             </ScrollArea>
           </div>
@@ -268,7 +269,7 @@ const RegisterAgree = () => {
             </div>
             <ScrollArea className="h-48 p-4">
               <div className="prose prose-sm prose-gray dark:prose-invert max-w-none">
-                <ReactMarkdown>{privacyContent}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{privacyContent}</ReactMarkdown>
               </div>
             </ScrollArea>
           </div>
